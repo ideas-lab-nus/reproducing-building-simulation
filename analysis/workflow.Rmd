@@ -95,11 +95,13 @@ job <- idf$last_job()
 elec <- job$report_data(name = "Electricity:Building", environment_name = "Singapore 2018")
 
 # convert to kWh
-elec <- elec %>%
+tbl_elec <- elec %>%
     mutate(
         value = units::set_units(value, "J") %>%
             units::set_units("kWh") %>%
-            units::drop_units(),
+            units::drop_units() %>%
+            round(2),
         units = "kWh"
-    )
+    ) %>%
+    select(datetime, `electricity [kWh]` = value)
 ```
