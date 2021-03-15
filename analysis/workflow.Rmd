@@ -1,0 +1,105 @@
+---
+title: "An example workflow of building energy model calibration"
+author:
+  - Hongyuan Jia
+  - Adrian Chong
+date: "`r Sys.Date()`"
+output: 
+    html_document:
+        toc: yes
+        toc_float:
+            collapsed: false
+            smooth_scroll: false
+        fig_caption: yes
+        theme: yeti
+---
+
+```{r setup, include = FALSE}
+library(tidyverse, warn.conflicts = FALSE) # data analysis
+library(eplusr)                            # integration with EnergyPlus
+library(here)                              # project-root-based file path
+
+# disable verbose information
+eplusr_option(verbose_info = FALSE)
+
+# install EnergyPlus v9.1 used in this workflow if necessary
+if (!is_avail_eplus(9.1)) install_eplus(9.1, local = TRUE)
+```
+
+# Workflow
+
+<!-- Create a workflow diagram? -->
+
+# Create synthetic meter data
+
+* Read un-calibrated model
+* Set calibration inputs and outputs
+* Use AMY weather file to generate synthetic measured data
+* Extract synthetic meter data and save it as a csv file
+
+## Read original un-calibrated model
+
+```{r read-ori}
+idf <- read_idf(here("data-raw/idf/Singapore_Concrete_Benchmark_Model.idf"))
+
+# remove all existing outputs
+idf$`Output:Variable` <- NULL
+idf$`Output:Meter:MeterFileOnly` <- NULL
+```
+
+## Calibration inputs, outputs and calibration parameters
+
+Calibration parameters:
+
+* LPD (Lighting Power Density) (`Watts per Zone Floor Area` field in `Lights` class)
+* Conductivity of exterior walls (`Conductivity` in `Material` class) <!-- "MaterialProperties" in the paper figures -->
+
+Input:
+
+* AMY weather <!-- "Weather_AMY" in the paper figures -->
+
+Outputs:
+
+* Hourly(?) building total electricity energy (`Electricity:Building` meter) <!-- "Building_Electricity" in the paper figures -->
+
+```{r add-outputs}
+idf$add(Output_Meter = list("Electricity:Building", "Hourly"))
+```
+
+Update `RunPeriod` to match the AMY year
+
+```{r runperiod}
+# update RunPeriod to correctly indicate an AMY EPW file is used
+idf$RunPeriod[[1]]$Name <- "Singapore 2018"
+idf$RunPeriod[[1]]$`Begin Year` <- 2018
+
+# day of week for start day will be automatically calculated based on begin year
+idf$RunPeriod[[1]]$`Day of Week for Start Day` <- NULL
+
+# save the model
+idf$save(here("data/idf/AMY.idf"), overwrite = TRUE)
+```
+
+```{r run-amy}
+# path of AMY EPW
+path_amy <- here("data-raw/epw/AMY/SGP_SINGAPORE-CHANGI-AP_486980_18.epw")
+
+# run annual simulation for AMY
+idf$run(path_amy, here("data/sim/AMY"), echo = FALSE)
+```
+
+Extract hourly electricity
+
+```{r elec}
+job <- idf$last_job()
+elec <- job$report_data(name = "Electricity:Building", environment_name = "Singapore 2018")
+
+# convert to kWh
+elec <- elec %>%
+    mutate(
+        value = units::set_units(value, "J") %>%
+            units::set_units("kWh") %>%
+            units::drop_units(),
+        units = "kWh"
+    )
+```
