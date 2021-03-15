@@ -4,7 +4,7 @@ author:
   - Hongyuan Jia
   - Adrian Chong
 date: "`r Sys.Date()`"
-output: 
+output:
     html_document:
         toc: yes
         toc_float:
@@ -17,6 +17,7 @@ output:
 ```{r setup, include = FALSE}
 library(tidyverse, warn.conflicts = FALSE) # data analysis
 library(eplusr)                            # integration with EnergyPlus
+library(formattable)                       # pretty formatted data
 library(here)                              # project-root-based file path
 
 # disable verbose information
@@ -24,6 +25,9 @@ eplusr_option(verbose_info = FALSE)
 
 # install EnergyPlus v9.1 used in this workflow if necessary
 if (!is_avail_eplus(9.1)) install_eplus(9.1, local = TRUE)
+
+# load helper functions
+source(here("R/functions.R"))
 ```
 
 # Workflow
@@ -80,6 +84,8 @@ idf$RunPeriod[[1]]$`Day of Week for Start Day` <- NULL
 idf$save(here("data/idf/AMY.idf"), overwrite = TRUE)
 ```
 
+Run annual simulation using AMY to generate synthetic meter data
+
 ```{r run-amy}
 # path of AMY EPW
 path_amy <- here("data-raw/epw/AMY/SGP_SINGAPORE-CHANGI-AP_486980_18.epw")
@@ -88,20 +94,84 @@ path_amy <- here("data-raw/epw/AMY/SGP_SINGAPORE-CHANGI-AP_486980_18.epw")
 idf$run(path_amy, here("data/sim/AMY"), echo = FALSE)
 ```
 
-Extract hourly electricity
+Extract hourly electricity from simulation as synthetic meter data
 
 ```{r elec}
 job <- idf$last_job()
-elec <- job$report_data(name = "Electricity:Building", environment_name = "Singapore 2018")
+meter <- job$report_data(name = "Electricity:Building", environment_name = "Singapore 2018")
 
 # convert to kWh
-tbl_elec <- elec %>%
+meter <- elec %>%
     mutate(
+        units = "kWh",
+        # convert from Joules to kWh
         value = units::set_units(value, "J") %>%
             units::set_units("kWh") %>%
             units::drop_units() %>%
-            round(2),
-        units = "kWh"
+            round(2)
     ) %>%
     select(datetime, `electricity [kWh]` = value)
+
+# save synthetic meter data
+write_csv(meter, here("data/synthetic_meter.csv"))
 ```
+
+# Create the original model to be calibrated
+
+Reset calibratian parameters to "initial" values
+
+```{r input}
+amy <- read_idf(here("data/idf/AMY.idf"))
+
+# get names of office zones
+re <- "(Core|Zone)_(Bot|Mid|Top)"
+zones <- amy$Zone %>% keep(~.$name() %>% str_detect(re))
+
+# get light object for each office zone
+lights <- zones %>% map(~.$ref_by_object(class = "Lights")[[1]])
+id_lights <- lights %>% map_int(~.$id())
+
+# set LPD to current reference value in Singapore standard
+amy$set(.(id_lights) := list(watts_per_zone_floor_area = 12))
+
+# set external wall thermal conductivity for each office zone
+amy$set(SGP_Concrete_150mm = list(Conductivity = 1.0))
+
+# save
+amy$save(here("data/idf/uncalibrated.idf"), overwrite = TRUE)
+```
+
+# Run initial simulation with IWEC
+
+```{r sim-initial}
+uncalib <- read_idf(here("data/idf/uncalibrated.idf"))
+path_epw_iwec <- here("data-raw/epw/IWEC/SGP_Singapore.486980_IWEC.epw")
+
+uncalib$run(path_epw_iwec, here("data/sim/uncalibrated"))
+```
+
+```{r res-initial}
+res <- uncalib$last_job()$
+    report_data(name = "Electricity:Building", environment_name = "Singapore 2018")
+```
+
+Current calibration creteria in ASHRAE Guideline 14 for NMBE and CVRMSE is 10%
+and 30% respectively.
+
+Calculate CVRMSE and NMBE
+
+```{r stats-initial}
+meter <- read_csv(here("data/synthetic_meter.csv"))
+
+nmbe_init <- nmbe(j_to_kwh(res$value), meter$`electricity [kWh]`)
+cvrmse_init <- cvrmse(j_to_kwh(res$value), meter$`electricity [kWh]`)
+```
+
+The initial CV(RMSE) is `r percent(cvrmse_init)` and `r percent(nmbe_init)`.
+
+# Calibration using AMY
+
+```{r}
+
+```
+
