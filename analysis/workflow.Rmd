@@ -5,6 +5,8 @@ author:
   - Adrian Chong
 date: "`r Sys.Date()`"
 output:
+    html_notebook:
+        default
     html_document:
         toc: yes
         toc_float:
@@ -12,12 +14,15 @@ output:
             smooth_scroll: false
         fig_caption: yes
         theme: yeti
+editor_options: 
+  chunk_output_type: inline
 ---
 
 ```{r setup, include = FALSE}
 library(tidyverse, warn.conflicts = FALSE) # data analysis
 library(eplusr)                            # integration with EnergyPlus
 library(formattable)                       # pretty formatted data
+library(lubridate, warn.conflicts = FALSE) # work with date time
 library(here)                              # project-root-based file path
 
 # disable verbose information
@@ -34,144 +39,287 @@ source(here("R/functions.R"))
 
 <!-- Create a workflow diagram? -->
 
+- The model we choose with brief description
+
 # Create synthetic meter data
 
-* Read un-calibrated model
-* Set calibration inputs and outputs
-* Use AMY weather file to generate synthetic measured data
-* Extract synthetic meter data and save it as a csv file
+- Read the original baseline model
+- Define observed inputs, outputs and calibration parameters
+- Run simulation to create synthetic data
 
-## Read original un-calibrated model
+## Read original baseline model
+
+First, we read the baseline model using the `eplusr::read_idf()` function.
 
 ```{r read-ori}
-idf <- read_idf(here("data-raw/idf/Singapore_Concrete_Benchmark_Model.idf"))
+# path of the baseline model
+path_base <- here("data-raw/idf/Singapore_Concrete_Benchmark_Model.idf")
 
-# remove all existing outputs
-idf$`Output:Variable` <- NULL
-idf$`Output:Meter:MeterFileOnly` <- NULL
+# read baseline model
+base <- read_idf(path_base)
 ```
 
-## Calibration inputs, outputs and calibration parameters
+We remove all outputs in the baseline model. So
 
-Calibration parameters:
+```{r}
+# remove all existing outputs
+base$`Output:Variable` <- NULL
+base$`Output:Meter:MeterFileOnly` <- NULL
+```
 
-* LPD (Lighting Power Density) (`Watts per Zone Floor Area` field in `Lights` class)
-* Conductivity of exterior walls (`Conductivity` in `Material` class) <!-- "MaterialProperties" in the paper figures -->
+## Observed inputs, outputs and calibration parameters
 
-Input:
+We choose AMY (Annual Meteorological Year) as the observed input. According to
+Fig.5 in our paper, AMY together with other separate local weather variables
+are commonly used as the observed inputs for calibration.
 
-* AMY weather <!-- "Weather_AMY" in the paper figures -->
+For calibration parameters, we select 6 most commonly used ones from Fig. 6 of
+our paper for demonstration, including:
 
-Outputs:
+- Material properties
+- Infiltration rate
+- Occupancy density
+- Lighting power density
+- Electric equipment power density
+- Cooling setpoint
 
-* Hourly(?) building total electricity energy (`Electricity:Building` meter) <!-- "Building_Electricity" in the paper figures -->
+The mapping between those parameters and corresponding EnergyPlus inputs for
+the baseline model are listed in the table blow:
+
+| Calibration parameter            | Class                             | Object                                   | Field                                     | Value |
+|----------------------------------+-----------------------------------+------------------------------------------+-------------------------------------------+-------|
+| Material properties              | `Material`                        | `SGP_Concrete_200mm`                     | `Conductivity {W/m-K}`                    | 1.442 |
+|                                  |                                   |                                          | `Density {kg/m3}`                         | 2400  |
+|                                  |                                   |                                          | `Specific Heat {J/kg-K}`                  | 832   |
+| Infiltration rate                | `ZoneInfiltration:DesignFlowRate` | All `*_Infiltration` objects for offices | `Air Changes per Hour {1/hr}`             | 0.2   |
+| Occupancy density                | `People`                          | All objects for offices                  | `Zone Floor Area per Person {m2/persion}` | 10    |
+| Lighting power density           | `Lights`                          | All `*_Lights` objects for offices       | `Watts per Zone Floor Area {W/m2}`        | 15    |
+| Electric equipment power sensity | `ElectricEquipment`               | All `*_Equip` objects for offices        | `Watts per Zone Floor Area {W/m2}`        | 14    |
+| Cooling setpoint                 | `Schedule:Compact`                | `Sch_Zone_Cooling_Setpoint_Wo_Solar`     | `Field 4`                                 | 24    |
+|                                  |                                   | `Sch_Zone_Cooling_Setpoint_Solar`        | `Field 4`                                 | 23    |
+
+For observed output, we choose hourly building electricity consumption. From
+Fig. 7 in our paper, we can see that all calibration parameters we select
+are commonly used together with building electricity consumption in
+calibration studies we investigated. The corresponding output variable in
+EnergyPlus is `Electriity: Building` with `Hourly` reporting frequency.
+
+Next, we run the baseline model using AMY EPW file to create synthetic observed
+output using simulations. The data will present noise-free measurements which
+functions as a surrogate for clean sensor data.
+
+Below we made some necessary to the baseline model, including adding the output
+meter and setting the begin year of `RunPeriod` objects based on our AMY
+weather data. We saved the modifed model as `AMY.idf` in the `data/idf` folder.
 
 ```{r add-outputs}
-idf$add(Output_Meter = list("Electricity:Building", "Hourly"))
-```
+# add hourly building electricity output meter
+base$add(Output_Meter = list("Electricity:Building", "Hourly"))
 
-Update `RunPeriod` to match the AMY year
-
-```{r runperiod}
 # update RunPeriod to correctly indicate an AMY EPW file is used
-idf$RunPeriod[[1]]$Name <- "Singapore 2018"
-idf$RunPeriod[[1]]$`Begin Year` <- 2018
+base$RunPeriod[[1]]$Name <- "Singapore 2018"
+base$RunPeriod[[1]]$`Begin Year` <- 2018
 
 # day of week for start day will be automatically calculated based on begin year
-idf$RunPeriod[[1]]$`Day of Week for Start Day` <- NULL
+base$RunPeriod[[1]]$`Day of Week for Start Day` <- NULL
 
 # save the model
-idf$save(here("data/idf/AMY.idf"), overwrite = TRUE)
+base$save(here("data/idf/base.idf"), overwrite = TRUE)
 ```
 
-Run annual simulation using AMY to generate synthetic meter data
+## Run simulation to create synthetic data
 
-```{r run-amy}
+Below we ran an annual simulation using the AMY EPW stored in
+`data-raw/epw/AMY` folder.
+
+```{r run-base}
 # path of AMY EPW
 path_amy <- here("data-raw/epw/AMY/SGP_SINGAPORE-CHANGI-AP_486980_18.epw")
 
 # run annual simulation for AMY
-idf$run(path_amy, here("data/sim/AMY"), echo = FALSE)
+base$run(path_amy, here("data/sim/base"), echo = FALSE)
 ```
 
-Extract hourly electricity from simulation as synthetic meter data
+Once the simulation completed, we extracted the output using `$report_data()`
+method, convert the unit of electricity from Joules to kWh and save the values
+together with the timestamp to a csv file named `synthetic_meter.csv` in the
+`data` folder.
 
-```{r elec}
-job <- idf$last_job()
-meter <- job$report_data(name = "Electricity:Building", environment_name = "Singapore 2018")
+```{r fun-elec}
+# create a function for extracting building electricity from simulation
+extract_electricity <- function(idf) {
+    if (is_idf(idf)) {
+        # get the simulation job from IDF
+        job <- idf$last_job()
 
-# convert to kWh
-meter <- elec %>%
-    mutate(
-        units = "kWh",
-        # convert from Joules to kWh
-        value = units::set_units(value, "J") %>%
-            units::set_units("kWh") %>%
-            units::drop_units() %>%
-            round(2)
-    ) %>%
-    select(datetime, `electricity [kWh]` = value)
+        # stop if no simulation has been run
+        if (is.null(job)) stop("No simulation job found for input IDF.")
+
+    } else if (is.character(idf)) {
+        # get the simulation SQLite from idf name
+        path_sql <- file.path(here("data/sim", idf, sprintf("%.sql", idf)))
+        job <- eplus_sql(path_sql)
+    }
+
+    # extract the annual electricity
+    job$report_data(
+        name = "Electricity:Building",
+        environment_name = "Singapore 2018",
+        year = 2018) %>%
+        # convert to kWh
+        mutate(value = j_to_kwh(value)) %>%
+        select(case, datetime, `electricity [kWh]` = value)
+}
+```
+
+```{r meter-base}
+meter_base <- base %>% extract_electricity()
 
 # save synthetic meter data
-write_csv(meter, here("data/synthetic_meter.csv"))
+write_csv(meter_base, here("data/synthetic_meter.csv"))
 ```
 
-# Create the original model to be calibrated
+# Create the initial test model to be calibrated
 
-Reset calibratian parameters to "initial" values
+In order to create a test model for calibration, we modified the values of 6
+calibration parameters in the baseline model.
 
-```{r input}
-amy <- read_idf(here("data/idf/AMY.idf"))
+## Read the baseline model
 
-# get names of office zones
-re <- "(Core|Zone)_(Bot|Mid|Top)"
-zones <- amy$Zone %>% keep(~.$name() %>% str_detect(re))
+```{r test}
+# read the baseline model as the starting point for the test model
+test <- read_idf(here("data/idf/base.idf"))
+```
 
-# get light object for each office zone
-lights <- zones %>% map(~.$ref_by_object(class = "Lights")[[1]])
-id_lights <- lights %>% map_int(~.$id())
+## Define measures to update model
 
-# set LPD to current reference value in Singapore standard
-amy$set(.(id_lights) := list(watts_per_zone_floor_area = 12))
+```{r measure}
+# define a function to update material properties
+update_material <- function(idf, conductivity, density, specific_heat) {
+    # modify material properties of the exterior walls
+    idf$set(SGP_Concrete_200mm = list(
+        conductivity = conductivity,
+        density = density,
+        specific_heat = specific_heat
+    ))
+}
 
-# set external wall thermal conductivity for each office zone
-amy$set(SGP_Concrete_150mm = list(Conductivity = 1.0))
+# define a function to update infiltration rate
+update_infiltration <- function(idf, infil) {
+    idf$set(ZoneInfiltration_DesignFlowRate := list(air_changes_per_hour = infil))
+}
+
+# define a function to update people density
+update_people <- function(idf, density) {
+    idf$set(People := list(zone_floor_area_per_person = density))
+}
+
+# define a function to update lighting power density
+update_lights <- function(idf, lpd) {
+    # get names of office zones
+    re <- "(Core|Zone)_(Bot|Mid|Top)"
+    zones <- idf$object_name("Zone")$Zone
+    zones <- str_subset(zones, re)
+
+    idf$set(c(sprintf("%s_Lights", zones)) := list(watts_per_zone_floor_area = lpd))
+}
+
+# define a function to update electric equipment power density
+update_equip <- function(idf, epd) {
+    idf$set(ElectricEquipment := list(watts_per_zone_floor_area = epd))
+}
+
+# define a function to update cooling setpoint
+update_setpoint <- function(idf, core, perimeter) {
+    idf$set(
+        Sch_Zone_Cooling_Setpoint_Wo_Solar = list(field_4 = as.character(perimeter)),
+        Sch_Zone_Cooling_Setpoint_Solar = list(field_4 = as.character(core))
+    )
+}
+```
+
+## Create the initial test model
+
+```{r create-test}
+update_material(test, conductivity = 0.8, density = 3800, specific_heat = 600)
+update_infiltration(test, infil = 1)
+update_people(test, density = 15)
+update_lights(test, lpd = 12)
+update_equip(test, epd = 10)
+update_setpoint(test, core = 26, perimeter = 25)
 
 # save
-amy$save(here("data/idf/uncalibrated.idf"), overwrite = TRUE)
+test$save(here("data/idf/init.idf"), overwrite = TRUE)
 ```
 
-# Run initial simulation with IWEC
+# Evaluate the performance of the initial test model
+
+## Run initial simulation with IWEC
 
 ```{r sim-initial}
-uncalib <- read_idf(here("data/idf/uncalibrated.idf"))
+# read the initial test model
+init <- read_idf(here("data/idf/init.idf"))
+# get the file path of IWEC EPW file
 path_epw_iwec <- here("data-raw/epw/IWEC/SGP_Singapore.486980_IWEC.epw")
 
-uncalib$run(path_epw_iwec, here("data/sim/uncalibrated"))
+# run annual simulation
+init$run(path_epw_iwec, here("data/sim/init"), echo = FALSE)
 ```
 
+## Extract the simulation results
+
 ```{r res-initial}
-res <- uncalib$last_job()$
-    report_data(name = "Electricity:Building", environment_name = "Singapore 2018")
+meter_init <- init %>% extract_electricity()
+```
+
+## Visualize the trend
+
+```{r line-initial}
+# function to read the synthetic data
+read_measured <- function() read_csv(here("data/synthetic_meter.csv"))
+
+# function to plot a line graph of one week in specified month
+weekly_compare <- function(meter, month, week) {
+    if (!is.data.frame(meter)) meter <- extract_electricity(meter)
+
+    meter %>%
+        bind_rows(read_measured()) %>%
+        mutate(month = month(datetime), day = mday(datetime)) %>%
+        filter(month == !!month, ceiling(day / 7) == !!week) %>%
+        ggplot(aes(datetime, `electricity [kWh]`, color = case)) +
+        geom_line() +
+        scale_x_datetime(NULL, date_labels = "%b %d %a") +
+        theme_bw()
+}
+```
+
+```{r}
+# select one week in July to examine the discrepancy
+meter_init %>% weekly_compare(7, 1)
+```
+
+## Calculate the statistical indicators
+
+```{r stats-initial}
+# function to get the nmbe and cvrmse
+cal_stats <- function(meter) {
+    synthetic <- read_measured()
+    c(nmbe = nmbe(meter$`electricity [kWh]`, synthetic$`electricity [kWh]`),
+      cvrmse = cvrmse(meter$`electricity [kWh]`, synthetic$`electricity [kWh]`))
+}
+```
+
+```{r}
+stats_init <- meter_init %>% cal_stats()
 ```
 
 Current calibration creteria in ASHRAE Guideline 14 for NMBE and CVRMSE is 10%
 and 30% respectively.
 
-Calculate CVRMSE and NMBE
+The initial CV(RMSE) is `r percent(stats_init["cvrmse"])` and `r percent(stats_init["nmbe"])`.
 
-```{r stats-initial}
-meter <- read_csv(here("data/synthetic_meter.csv"))
-
-nmbe_init <- nmbe(j_to_kwh(res$value), meter$`electricity [kWh]`)
-cvrmse_init <- cvrmse(j_to_kwh(res$value), meter$`electricity [kWh]`)
-```
-
-The initial CV(RMSE) is `r percent(cvrmse_init)` and `r percent(nmbe_init)`.
-
-# Calibration using AMY
+# Session Info
 
 ```{r}
-
+sessionInfo()
 ```
-
