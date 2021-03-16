@@ -5,17 +5,15 @@ author:
   - Adrian Chong
 date: "`r Sys.Date()`"
 output:
-    html_notebook:
-        default
     html_document:
         toc: yes
         toc_float:
             collapsed: false
             smooth_scroll: false
         fig_caption: yes
-        theme: yeti
-editor_options: 
-  chunk_output_type: inline
+        theme:
+            version: 4
+            bootswath: flatly
 ---
 
 ```{r setup, include = FALSE}
