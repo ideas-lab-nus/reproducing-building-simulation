@@ -214,7 +214,8 @@ stats_init <- meter_init %>% cal_stats()
 Current calibration creteria in ASHRAE Guideline 14 for NMBE and CVRMSE is 10%
 and 30% respectively.
 
-The initial CV(RMSE) is `r stats_init["cvrmse"]` and `r stats_init["nmbe"]`.
+The initial NMBE and CV(RMSE) is `r stats_init["nmbe"]` and
+`r stats_init["cvrmse"]`, respectively.
 
 # Use AMY
 
