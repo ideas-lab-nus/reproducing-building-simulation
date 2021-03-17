@@ -46,6 +46,8 @@ source(here("R/functions.R"))
 
 ## Read original baseline model
 
+Here, we use the reference large office building building 
+
 First, we read the baseline model using the `eplusr::read_idf()` function.
 
 ```{r read-ori}
@@ -58,7 +60,7 @@ base <- read_idf(path_base)
 
 We remove all outputs in the baseline model. So
 
-```{r}
+```{r rem-outputs}
 # remove all existing outputs
 base$`Output:Variable` <- NULL
 base$`Output:Meter:MeterFileOnly` <- NULL
@@ -156,7 +158,7 @@ calibration parameters in the baseline model.
 
 ## Read the baseline model
 
-```{r test}
+```{r read-init}
 # read the baseline model as the starting point for the test model
 init <- read_idf(here("data/idf/base.idf"))
 ```
@@ -225,7 +227,7 @@ path_epw_amy <- here("data-raw/epw/AMY/SGP_SINGAPORE-CHANGI-AP_486980_18.epw")
 init$run(path_epw_amy, here("data/sim/amy"), echo = FALSE)
 ```
 
-```{r}
+```{r stats-amy}
 meter_amy <- init %>% extract_electricity()
 
 meter_amy %>% weekly_compare(7, 1)
@@ -237,29 +239,16 @@ After using AMY EPW file, the CV(RMSE) is `r stats_amy["cvrmse"]` and `r stats_a
 
 # Use optimization to calibrate the model
 
-```{r}
-# NOTE: have to combine all parameters in an unnamed list in order to directly
-#       use the ecr::ecr() function. Otherwise, will have to construct the
-#       workflow manually, which is what epluspar package does. But it will
-#       require much more code. Using the ecr::ecr() may make it "simpler" to
-#       non-programmers
-calib_fitness <- function(params) {
+```{r optim-full}
+# define a fitness function which takes all calibration parameters as input and
+# return the CV(RMSE) and NMBE as output
+calib_fitness <- function(conductivity, density, specific_heat, infil, people,
+                          lpd, epd, core, perimeter,
+                          gen, # generation index used to save model and results
+                          ind  # individual index used to save model and results
+) {
     # read the initial model
     idf <- eplusr::read_idf(here::here("data/idf/init.idf"))
-
-    # source the utility functions to avoid re-exporting them when evaluating
-    # fitness in parallel using ecr which internally use parallelMap package
-    source(here::here("R/functions.R"))
-
-    conductivity  <- params[[1]]
-    density       <- params[[2]]
-    specific_heat <- params[[3]]
-    infil         <- params[[4]]
-    people        <- params[[5]]
-    lpd           <- params[[6]]
-    epd           <- params[[7]]
-    core          <- params[[8]]
-    perimeter     <- params[[9]]
 
     # update calibration parameter based on input
     update_material(idf, conductivity = conductivity, density = density,
@@ -270,38 +259,72 @@ calib_fitness <- function(params) {
     update_equip(idf, epd = epd)
     update_setpoint(idf, core = core, perimeter = perimeter)
 
-    # save
-    idf$save(tempfile(fileext = ".idf"), overwrite = TRUE)
+    # save model into corresponding generation folder in 'data/idf'
+    ## contruct generation folder
+    dir_gen <- sprintf("Gen%i", gen)
+    ## contruct individual model path
+    idf_ind <- sprintf("%s_Ind%i.idf", dir_gen, ind)
+    ## save
+    idf$save(here::here("data/idf", dir_gen, idf_ind), overwrite = TRUE)
 
     # run simulation
     path_epw_amy <- here::here("data-raw/epw/AMY/SGP_SINGAPORE-CHANGI-AP_486980_18.epw")
+    ## contruct individual simulation output path
+    dir_out <- here::here("data/sim", dir_gen, sprintf("%s_Ind%i", dir_gen, ind))
     ## run simulation with AMY
-    idf$run(path_epw_amy, echo = FALSE)
-
-    # generate a plot
-    p <- weekly_compare(idf, month = 7, week = 1)
-    ## contruct individual plot path
-    png_ind <- sprintf("%.png", tools::file_path_san_ext(idf$path()))
-    ## save the plot
-    ggplot2::ggsave(png_ind, p, height = 6, width = 10, dpi = 300)
+    idf$run(path_epw_amy, dir_out, echo = FALSE)
 
     # calculate statistical indicators
-    abs(cal_stats(idf))
+    stats <- cal_stats(idf)
+
+    # generate a plot with inputs and outputs
+    p <- weekly_compare(idf, month = 7, week = 1) +
+        ggplot2::labs(
+            title = sprintf("Gen: %i, Ind: %i; NMBE: %s; CV(RMSE): %s",
+                gen, ind, stats["nmbe"], stats["cvrmse"]
+            ),
+            subtitle = paste0(
+                "Conductivity: "       , round(conductivity  , 2) , "W/m-K\n"     ,
+                "Density: "            , round(density       , 2) , "kg/m3\n"     ,
+                "Specific Heat: "      , round(specific_heat , 2) , "J/kg-K\n"    ,
+                "Infiltration Rate: "  , round(infil         , 2) , "1/hour\n"    ,
+                "People Density: "     , round(people        , 2) , "m2/person\n" ,
+                "LPD: "                , round(lpd           , 2) , "W/m2\n"      ,
+                "EPD: "                , round(epd           , 2) , "W/m2\n"      ,
+                "Core Setpoint: "      , round(core          , 2) , "C\n"         ,
+                "Perimeter Setpoint: " , round(perimeter     , 2) , "C\n"
+            )
+        )
+    ## contruct individual plot path
+    png_ind <- sprintf("%s_Ind%i.png", dir_gen, ind)
+    ## create the folder to store plot of each generation
+    if (!dir.exists(here::here("figures", dir_gen))) {
+        dir.create(here::here("figures", dir_gen))
+    }
+    ## save the plot
+    ggplot2::ggsave(here::here("figures", dir_gen, png_ind),
+        p, height = 6, width = 10, dpi = 300)
+
+    abs(stats)
 }
 
-# define the serach space of each parameter
-space_param <- dplyr::tribble(
-    ~parameter       , ~lower, ~upper,
-     "conductivity"  ,    0.5,   2.0 ,
-     "density"       ,   1000,  3000 ,
-     "specific_heat" ,    600,  1000 ,
-     "infil"         ,      0,    3  ,
-     "people"        ,      5,   15  ,
-     "lpd"           ,     10,   20  ,
-     "epd"           ,     10,   20  ,
-     "core"          ,     20,   26  ,
-     "perimeter"     ,     20,   26
-)
+# define a function to evaluate the fitness in parallel
+evaluate_fitness <- function(control, inds, gen) {
+    # add generation and individual index
+    inds <- purrr::map2(inds, seq_along(inds), ~c(.x, gen, .y))
+
+    # use future framework to run in parallel
+    future::plan(future::multisession, workers = 6)
+    on.exit(future::plan(future::sequential), add = TRUE)
+
+    fun <- control$task$fitness.fun
+    fit <- future.apply::future_mapply(
+        function(ind) do.call(fun, as.list(ind)),
+        inds, SIMPLIFY = FALSE, future.seed = TRUE
+    )
+
+    ecr:::makeFitnessMatrix(do.call(cbind, fit), control)
+}
 
 # create a terminator to stop simulation when CV(RMSE) and NMBE meet the
 # creteria in ASHRAE Guideline 14
@@ -320,38 +343,72 @@ stopOnMeetCreteria <- function(cvrmse = 0.3, nmbe = 0.1) {
     )
 }
 
-# define setup values
-MU <- 10L     # number of individuals per generation
-LAMBDA <- 20L # number of generations
+# define an ecr control object to store information on the objective function
+control <- ecr::initECRControl(calib_fitness, n.objectives = 2, minimize = TRUE)
+# initial a logger to store population and fitness
+log <- ecr::initLogger(control, log.pop = TRUE)
+# initial archive of Pareto front
+pareto <- ecr::initParetoArchive(control)
 
-# run in parallel
-# fix https://github.com/jakobbossek/ecr2/issues/130
-parallelMap::parallelRegisterLevels(package = "ecr",
-    levels = c("evaluateFitness", "generateOffspring", "computeDominanceRanking",
-        "computeIndicators")
-)
+# set evolutionary operators
+# use no priors and set all parameters to follow uniform distribution
+control <- ecr::registerECROperator(control, "mutate", ecr::mutUniform,
+    lower = space_param$lower, upper = space_param$upper)
+control <- ecr::registerECROperator(control, "recombine", ecr::recCrossover)
+control <- ecr::registerECROperator(control, "selectForMating", ecr::selSimple )
+control <- ecr::registerECROperator(control, "selectForSurvival", ecr::selNondom)
 
-parallelMap::parallelStart(mode = "socket", cpus = 6)
+# initialize population of MU random values
+pop <- ecr::initPopulation(
+    MU, ecr::genReal, n.dim = nrow(space_param),
+    lower = space_param$lower, upper = space_param$upper)
 
-results <- ecr::ecr(
-    fitness.fun = calib_fitness,
-    minimize = TRUE,
-    n.objectives = 2,
-    n.dim = nrow(space_param),
-    lower = space_param$lower,
-    upper = space_param$upper,
-    representation = "float",
-    mu = MU, lambda = LAMBDA,
-    p.recomb = 0.7, p.mut = 0.3,
-    log.pop = TRUE,
-    terminators = list(stopOnMeetCreteria(cvrmse = 0.3, nmbe = 0.1))
-)
+# evaluate fitness of initial population
+fit <- evaluate_fitness(control, pop, 0)
 
-parallelMap::parallelStop()
+# save fitness in population
+for (i in seq_along(pop)) attr(pop[[i]], "fitness") <- fit[, i]
+
+# update log
+ecr::updateLogger(log, pop, fit, MU)
+
+# run evolutionary loop
+repeat {
+    cat(sprintf("Generation [%i]\n", logger$env$n.gens + 1L))
+
+    # generate offspring
+    cat("  * Generate offspring\n")
+    offspring <- ecr::generateOffspring(control, pop, fit, LAMBDA, p.recomb = 0.7, p.mut = 0.1)
+
+    cat("  * Evaluate fitness values\n")
+    fit_offspring <- evaluate_fitness(control, pop, 0)
+
+    # save fitness in population
+    for (i in seq_along(pop)) attr(pop[[i]], "fitness") <- fit[, i]
+
+    cat("  * Prepare next generation\n")
+    sel <- ecr::replaceMuCommaLambda(control, pop, offspring, fit, fit_offspring)
+
+    pop <- sel$population
+    fit <- sel$fitness
+
+    # do some logging
+    cli::cat_line("  * Update log")
+    ecr::updateLogger(log, pop, fit, MU)
+
+    cli::cat_line("  * Check whether terminator conditions are met")
+    stop_obj <- ecr:::doTerminate(log, list(stopOnMeetCreteria(cvrmse = 0.3, nmbe = 0.1)))
+
+    if (length(stop_obj) > 0L) {
+        cli::cat_rule("Terminated")
+        cli::cat_line(sprintf("  < %s: %s >", stop_obj$name, stop_obj$message))
+        break
+    }
+}
 ```
 
 # Session Info
 
-```{r}
+```{r session-info}
 sessionInfo()
 ```
