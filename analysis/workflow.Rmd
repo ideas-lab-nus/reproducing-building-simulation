@@ -18,9 +18,8 @@ output:
 
 ```{r setup, include = FALSE}
 library(tidyverse, warn.conflicts = FALSE) # data analysis
-library(eplusr)                            # integration with EnergyPlus
-library(formattable)                       # pretty formatted data
 library(lubridate, warn.conflicts = FALSE) # work with date time
+library(eplusr)                            # integration with EnergyPlus
 library(here)                              # project-root-based file path
 
 # disable verbose information
@@ -132,43 +131,16 @@ Below we ran an annual simulation using the AMY EPW stored in
 
 ```{r run-base}
 # path of AMY EPW
-path_amy <- here("data-raw/epw/AMY/SGP_SINGAPORE-CHANGI-AP_486980_18.epw")
+path_epw_amy <- here("data-raw/epw/AMY/SGP_SINGAPORE-CHANGI-AP_486980_18.epw")
 
 # run annual simulation for AMY
-base$run(path_amy, here("data/sim/base"), echo = FALSE)
+base$run(path_epw_amy, here("data/sim/base"), echo = FALSE)
 ```
 
 Once the simulation completed, we extracted the output using `$report_data()`
 method, convert the unit of electricity from Joules to kWh and save the values
 together with the timestamp to a csv file named `synthetic_meter.csv` in the
 `data` folder.
-
-```{r fun-elec}
-# create a function for extracting building electricity from simulation
-extract_electricity <- function(idf) {
-    if (is_idf(idf)) {
-        # get the simulation job from IDF
-        job <- idf$last_job()
-
-        # stop if no simulation has been run
-        if (is.null(job)) stop("No simulation job found for input IDF.")
-
-    } else if (is.character(idf)) {
-        # get the simulation SQLite from idf name
-        path_sql <- file.path(here("data/sim", idf, sprintf("%.sql", idf)))
-        job <- eplus_sql(path_sql)
-    }
-
-    # extract the annual electricity
-    job$report_data(
-        name = "Electricity:Building",
-        environment_name = "Singapore 2018",
-        year = 2018) %>%
-        # convert to kWh
-        mutate(value = j_to_kwh(value)) %>%
-        select(case, datetime, `electricity [kWh]` = value)
-}
-```
 
 ```{r meter-base}
 meter_base <- base %>% extract_electricity()
@@ -186,71 +158,24 @@ calibration parameters in the baseline model.
 
 ```{r test}
 # read the baseline model as the starting point for the test model
-test <- read_idf(here("data/idf/base.idf"))
-```
-
-## Define measures to update model
-
-```{r measure}
-# define a function to update material properties
-update_material <- function(idf, conductivity, density, specific_heat) {
-    # modify material properties of the exterior walls
-    idf$set(SGP_Concrete_200mm = list(
-        conductivity = conductivity,
-        density = density,
-        specific_heat = specific_heat
-    ))
-}
-
-# define a function to update infiltration rate
-update_infiltration <- function(idf, infil) {
-    idf$set(ZoneInfiltration_DesignFlowRate := list(air_changes_per_hour = infil))
-}
-
-# define a function to update people density
-update_people <- function(idf, density) {
-    idf$set(People := list(zone_floor_area_per_person = density))
-}
-
-# define a function to update lighting power density
-update_lights <- function(idf, lpd) {
-    # get names of office zones
-    re <- "(Core|Zone)_(Bot|Mid|Top)"
-    zones <- idf$object_name("Zone")$Zone
-    zones <- str_subset(zones, re)
-
-    idf$set(c(sprintf("%s_Lights", zones)) := list(watts_per_zone_floor_area = lpd))
-}
-
-# define a function to update electric equipment power density
-update_equip <- function(idf, epd) {
-    idf$set(ElectricEquipment := list(watts_per_zone_floor_area = epd))
-}
-
-# define a function to update cooling setpoint
-update_setpoint <- function(idf, core, perimeter) {
-    idf$set(
-        Sch_Zone_Cooling_Setpoint_Wo_Solar = list(field_4 = as.character(perimeter)),
-        Sch_Zone_Cooling_Setpoint_Solar = list(field_4 = as.character(core))
-    )
-}
+init <- read_idf(here("data/idf/base.idf"))
 ```
 
 ## Create the initial test model
 
-```{r create-test}
-update_material(test, conductivity = 0.8, density = 3800, specific_heat = 600)
-update_infiltration(test, infil = 1)
-update_people(test, density = 15)
-update_lights(test, lpd = 12)
-update_equip(test, epd = 10)
-update_setpoint(test, core = 26, perimeter = 25)
+```{r create-init}
+update_material(init, conductivity = 0.8, density = 3800, specific_heat = 600)
+update_infiltration(init, infil = 1)
+update_people(init, people = 15)
+update_lights(init, lpd = 12)
+update_equip(init, epd = 10)
+update_setpoint(init, core = 26, perimeter = 25)
 
 # save
-test$save(here("data/idf/init.idf"), overwrite = TRUE)
+init$save(here("data/idf/init.idf"), overwrite = TRUE)
 ```
 
-# Evaluate the performance of the initial test model
+# Evaluate the performance of the initial init model
 
 ## Run initial simulation with IWEC
 
@@ -272,49 +197,159 @@ meter_init <- init %>% extract_electricity()
 
 ## Visualize the trend
 
-```{r line-initial}
-# function to read the synthetic data
-read_measured <- function() read_csv(here("data/synthetic_meter.csv"))
-
-# function to plot a line graph of one week in specified month
-weekly_compare <- function(meter, month, week) {
-    if (!is.data.frame(meter)) meter <- extract_electricity(meter)
-
-    meter %>%
-        bind_rows(read_measured()) %>%
-        mutate(month = month(datetime), day = mday(datetime)) %>%
-        filter(month == !!month, ceiling(day / 7) == !!week) %>%
-        ggplot(aes(datetime, `electricity [kWh]`, color = case)) +
-        geom_line() +
-        scale_x_datetime(NULL, date_labels = "%b %d %a") +
-        theme_bw()
-}
-```
-
-```{r}
+```{r plot-init}
 # select one week in July to examine the discrepancy
 meter_init %>% weekly_compare(7, 1)
 ```
 
 ## Calculate the statistical indicators
 
-```{r stats-initial}
-# function to get the nmbe and cvrmse
-cal_stats <- function(meter) {
-    synthetic <- read_measured()
-    c(nmbe = nmbe(meter$`electricity [kWh]`, synthetic$`electricity [kWh]`),
-      cvrmse = cvrmse(meter$`electricity [kWh]`, synthetic$`electricity [kWh]`))
-}
-```
-
-```{r}
+```{r stats-init}
 stats_init <- meter_init %>% cal_stats()
 ```
 
 Current calibration creteria in ASHRAE Guideline 14 for NMBE and CVRMSE is 10%
 and 30% respectively.
 
-The initial CV(RMSE) is `r percent(stats_init["cvrmse"])` and `r percent(stats_init["nmbe"])`.
+The initial CV(RMSE) is `r stats_init["cvrmse"]` and `r stats_init["nmbe"]`.
+
+# Use AMY
+
+```{r run-amy}
+# read the initial test model
+init <- read_idf(here("data/idf/init.idf"))
+# path of AMY EPW
+path_epw_amy <- here("data-raw/epw/AMY/SGP_SINGAPORE-CHANGI-AP_486980_18.epw")
+
+# run annual simulation
+init$run(path_epw_amy, here("data/sim/amy"), echo = FALSE)
+```
+
+```{r}
+meter_amy <- init %>% extract_electricity()
+
+meter_amy %>% weekly_compare(7, 1)
+
+stats_amy <- meter_amy %>% cal_stats()
+```
+
+After using AMY EPW file, the CV(RMSE) is `r stats_amy["cvrmse"]` and `r stats_amy["nmbe"]`.
+
+# Use optimization to calibrate the model
+
+```{r}
+# NOTE: have to combine all parameters in an unnamed list in order to directly
+#       use the ecr::ecr() function. Otherwise, will have to construct the
+#       workflow manually, which is what epluspar package does. But it will
+#       require much more code. Using the ecr::ecr() may make it "simpler" to
+#       non-programmers
+calib_fitness <- function(params) {
+    # read the initial model
+    idf <- eplusr::read_idf(here::here("data/idf/init.idf"))
+
+    # source the utility functions to avoid re-exporting them when evaluating
+    # fitness in parallel using ecr which internally use parallelMap package
+    source(here::here("R/functions.R"))
+
+    conductivity  <- params[[1]]
+    density       <- params[[2]]
+    specific_heat <- params[[3]]
+    infil         <- params[[4]]
+    people        <- params[[5]]
+    lpd           <- params[[6]]
+    epd           <- params[[7]]
+    core          <- params[[8]]
+    perimeter     <- params[[9]]
+
+    # update calibration parameter based on input
+    update_material(idf, conductivity = conductivity, density = density,
+        specific_heat = specific_heat)
+    update_infiltration(idf, infil = infil)
+    update_people(idf, people = people)
+    update_lights(idf, lpd = lpd)
+    update_equip(idf, epd = epd)
+    update_setpoint(idf, core = core, perimeter = perimeter)
+
+    # save
+    idf$save(tempfile(fileext = ".idf"), overwrite = TRUE)
+
+    # run simulation
+    path_epw_amy <- here::here("data-raw/epw/AMY/SGP_SINGAPORE-CHANGI-AP_486980_18.epw")
+    ## run simulation with AMY
+    idf$run(path_epw_amy, echo = FALSE)
+
+    # generate a plot
+    p <- weekly_compare(idf, month = 7, week = 1)
+    ## contruct individual plot path
+    png_ind <- sprintf("%.png", tools::file_path_san_ext(idf$path()))
+    ## save the plot
+    ggplot2::ggsave(png_ind, p, height = 6, width = 10, dpi = 300)
+
+    # calculate statistical indicators
+    abs(cal_stats(idf))
+}
+
+# define the serach space of each parameter
+space_param <- dplyr::tribble(
+    ~parameter       , ~lower, ~upper,
+     "conductivity"  ,    0.5,   2.0 ,
+     "density"       ,   1000,  3000 ,
+     "specific_heat" ,    600,  1000 ,
+     "infil"         ,      0,    3  ,
+     "people"        ,      5,   15  ,
+     "lpd"           ,     10,   20  ,
+     "epd"           ,     10,   20  ,
+     "core"          ,     20,   26  ,
+     "perimeter"     ,     20,   26
+)
+
+# create a terminator to stop simulation when CV(RMSE) and NMBE meet the
+# creteria in ASHRAE Guideline 14
+stopOnMeetCreteria <- function(cvrmse = 0.3, nmbe = 0.1) {
+    condition.fun <- function(log) {
+        # fitness of current individual
+        fit <- log$env$pop[[log$env$n.evals]]$fitness
+        # check if creteria are met
+        fit[1] <= nmbe && fit[2] <= cvrmse
+    }
+
+    ecr::makeTerminator(
+        condition.fun,
+        name = "MeetCalibrationCreteria",
+        message = sprintf("Calibration creteria (CVRMSE=%s, NMBE=%s) has been met", cvrmse, nmbe)
+    )
+}
+
+# define setup values
+MU <- 10L     # number of individuals per generation
+LAMBDA <- 20L # number of generations
+
+# run in parallel
+# fix https://github.com/jakobbossek/ecr2/issues/130
+parallelMap::parallelRegisterLevels(package = "ecr",
+    levels = c("evaluateFitness", "generateOffspring", "computeDominanceRanking",
+        "computeIndicators")
+)
+
+parallelMap::parallelStart(mode = "socket", cpus = 6)
+
+results <- ecr::ecr(
+    fitness.fun = calib_fitness,
+    minimize = TRUE,
+    n.objectives = 2,
+    n.dim = nrow(space_param),
+    lower = space_param$lower,
+    upper = space_param$upper,
+    representation = "float",
+    mu = MU, lambda = LAMBDA,
+    p.recomb = 0.7, p.mut = 0.3,
+    log.pop = TRUE,
+    terminators = list(stopOnMeetCreteria(cvrmse = 0.3, nmbe = 0.1))
+)
+
+parallelMap::parallelStop()
+```
+
 
 # Session Info
 
