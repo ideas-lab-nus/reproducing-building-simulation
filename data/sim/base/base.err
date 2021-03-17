@@ -1,4 +1,4 @@
-Program Version,EnergyPlus, Version 9.1.0-08d2e308bb, YMD=2021.03.17 01:37,
+Program Version,EnergyPlus, Version 9.1.0-08d2e308bb, YMD=2021.03.17 18:19,
    ************* Beginning Zone Sizing Calculations
    ** Warning ** Site:GroundTemperature:BuildingSurface: Some values fall outside the range of 15-25C.
    **   ~~~   ** These values may be inappropriate.  Please consult the Input Output Reference for more details.
@@ -115,4 +115,4 @@ Program Version,EnergyPlus, Version 9.1.0-08d2e308bb, YMD=2021.03.17 01:37,
    *************
    ************* EnergyPlus Warmup Error Summary. During Warmup: 0 Warning; 0 Severe Errors.
    ************* EnergyPlus Sizing Error Summary. During Sizing: 31 Warning; 0 Severe Errors.
-   ************* EnergyPlus Completed Successfully-- 5891 Warning; 0 Severe Errors; Elapsed Time=00hr 01min 50.13sec
+   ************* EnergyPlus Completed Successfully-- 5891 Warning; 0 Severe Errors; Elapsed Time=00hr 01min 45.58sec
