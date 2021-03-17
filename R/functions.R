@@ -74,7 +74,7 @@ read_measured <- function() {
 
 # function to extract building electricity from simulation
 extract_electricity <- function(idf) {
-    if (is_idf(idf)) {
+    if (eplusr::is_idf(idf)) {
         # get the simulation job from IDF
         job <- idf$last_job()
 
