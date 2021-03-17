@@ -108,6 +108,7 @@ weekly_compare <- function(meter, month = 7, week = 1) {
         ggplot2::ggplot(ggplot2::aes(datetime, `electricity [kWh]`, color = case)) +
         ggplot2::geom_line() +
         ggplot2::scale_x_datetime(NULL, date_labels = "%b %d %a") +
+        ggplot2::scale_y_continuous("Electricity [kWh]", limits = c(0, 700)) +
         ggplot2::theme_bw()
 }
 
