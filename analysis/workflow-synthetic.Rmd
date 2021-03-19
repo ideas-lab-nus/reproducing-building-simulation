@@ -1,0 +1,159 @@
+---
+title: "An example workflow of building energy model calibration"
+author:
+  - Hongyuan Jia
+  - Adrian Chong
+date: "`r Sys.Date()`"
+output:
+    html_document:
+        toc: yes
+        toc_float:
+            collapsed: false
+            smooth_scroll: false
+        fig_caption: yes
+        theme:
+            version: 4
+            bootswath: flatly
+---
+
+```{r setup, include = FALSE}
+library(tidyverse, warn.conflicts = FALSE) # data analysis
+library(lubridate, warn.conflicts = FALSE) # work with date time
+library(eplusr)                            # integration with EnergyPlus
+library(here)                              # project-root-based file path
+
+# disable verbose information
+eplusr_option(verbose_info = FALSE)
+
+# install EnergyPlus v9.1 used in this workflow if necessary
+if (!is_avail_eplus(9.1)) install_eplus(9.1, local = TRUE)
+
+# load helper functions
+source(here("R/functions.R"))
+```
+
+# Workflow
+
+<!-- Create a workflow diagram? -->
+
+- The model we choose with brief description
+
+# Create synthetic meter data
+
+- Read the original baseline model
+- Define observed inputs, outputs and calibration parameters
+- Run simulation to create synthetic data
+
+## Read original baseline model
+
+Here, we use the reference large office building building for Singapore
+developed by Duarte, Raftery and Schiavon.
+
+First, we read the baseline model using the `eplusr::read_idf()` function.
+
+```{r read-ori}
+# path of the baseline model
+path_base <- here("data-raw/idf/Singapore_Concrete_Benchmark_Model.idf")
+
+# read baseline model
+base <- read_idf(path_base)
+```
+
+We remove all outputs in the baseline model. So
+
+```{r rem-outputs}
+# remove all existing outputs
+base$`Output:Variable` <- NULL
+base$`Output:Meter:MeterFileOnly` <- NULL
+```
+
+## Observed inputs, outputs and calibration parameters
+
+We choose AMY (Annual Meteorological Year) as the observed input.
+AMY together with other separate local weather variables are commonly used as
+the observed inputs for calibration.
+
+For calibration parameters, we select 6 most commonly used ones for
+demonstration, including:
+
+- Material properties
+- Infiltration rate
+- Occupancy density
+- Lighting power density
+- Electric equipment power density
+- Cooling setpoint
+
+The mapping between those parameters and corresponding EnergyPlus inputs for
+the baseline model are listed in the table blow:
+
+| Calibration parameter            | Class                             | Object                                   | Field                                     | Value |
+|----------------------------------+-----------------------------------+------------------------------------------+-------------------------------------------+-------|
+| Material properties              | `Material`                        | `SGP_Concrete_200mm`                     | `Conductivity {W/m-K}`                    | 1.442 |
+|                                  |                                   |                                          | `Density {kg/m3}`                         | 2400  |
+|                                  |                                   |                                          | `Specific Heat {J/kg-K}`                  | 832   |
+| Infiltration rate                | `ZoneInfiltration:DesignFlowRate` | All `*_Infiltration` objects for offices | `Air Changes per Hour {1/hr}`             | 0.2   |
+| Occupancy density                | `People`                          | All objects for offices                  | `Zone Floor Area per Person {m2/persion}` | 10    |
+| Lighting power density           | `Lights`                          | All `*_Lights` objects for offices       | `Watts per Zone Floor Area {W/m2}`        | 15    |
+| Electric equipment power sensity | `ElectricEquipment`               | All `*_Equip` objects for offices        | `Watts per Zone Floor Area {W/m2}`        | 14    |
+| Cooling setpoint                 | `Schedule:Compact`                | `Sch_Zone_Cooling_Setpoint_Wo_Solar`     | `Field 4`                                 | 24    |
+|                                  |                                   | `Sch_Zone_Cooling_Setpoint_Solar`        | `Field 4`                                 | 23    |
+
+For observed output, we choose hourly building electricity consumption. All
+calibration parameters are commonly used together with building electricity
+consumption in calibration studies we investigated. The corresponding output
+variable in EnergyPlus is `Electriity: Building` with `Hourly` reporting
+frequency.
+
+Next, we run the baseline model using AMY EPW file to create synthetic observed
+output using simulations. The data will present noise-free measurements which
+functions as a surrogate for clean sensor data.
+
+Below we made some necessary to the baseline model, including adding the output
+meter and setting the begin year of `RunPeriod` objects based on our AMY
+weather data. We saved the modifed model as `AMY.idf` in the `data/idf` folder.
+
+```{r add-outputs}
+# add hourly building electricity output meter
+base$add(Output_Meter = list("Electricity:Building", "Hourly"))
+
+# update RunPeriod to correctly indicate an AMY EPW file is used
+base$RunPeriod[[1]]$Name <- "Singapore 2018"
+base$RunPeriod[[1]]$`Begin Year` <- 2018
+
+# day of week for start day will be automatically calculated based on begin year
+base$RunPeriod[[1]]$`Day of Week for Start Day` <- NULL
+
+# save the model
+base$save(here("data/idf/base.idf"), overwrite = TRUE)
+```
+
+## Run simulation to create synthetic data
+
+Below we ran an annual simulation using the AMY EPW stored in
+`data-raw/epw/AMY` folder.
+
+```{r run-base}
+# path of AMY EPW
+path_epw_amy <- here("data-raw/epw/AMY/SGP_SINGAPORE-CHANGI-AP_486980_18.epw")
+
+# run annual simulation for AMY
+base$run(path_epw_amy, here("data/sim/base"), echo = FALSE)
+```
+
+Once the simulation completed, we extracted the output using `$report_data()`
+method, convert the unit of electricity from Joules to kWh and save the values
+together with the timestamp to a csv file named `synthetic_meter.csv` in the
+`data` folder.
+
+```{r meter-base}
+meter_base <- base %>% extract_electricity()
+
+# save synthetic meter data
+write_csv(meter_base, here("data/synthetic_meter.csv"))
+```
+
+# Session Info
+
+```{r session-info}
+sessionInfo()
+```
