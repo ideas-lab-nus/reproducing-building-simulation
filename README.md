@@ -8,9 +8,8 @@ workflow.
 More details can be found in [our paper]():
 
 > Adrian Chong, Yaonan Gu and Hongyuan Jia, (2021).
-> *Calibrating building energy simulation models: A review of modeling methods
-> and data requirements*.
->  Renewable & Sustainable Energy Reviews <https://doi.org/xxx/xxx>
+> *Calibrating building energy simulation models: A review of methods, inputs and outputs*.
+> *In Review*. <https://doi.org/xxx/xxx>
 
 ## How to access
 
