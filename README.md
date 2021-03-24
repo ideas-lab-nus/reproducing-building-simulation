@@ -1,15 +1,27 @@
-# An example of reproducible building energy model calibration
+# A simple example of reproducible building energy simulation
 
 [![Launch RStudio Cloud](https://img.shields.io/badge/RStudio-Cloud-blue)](https://rstudio.cloud/project/2306579)
 
-This repository is an example of reproducible building energy model calibration
-workflow.
+This repository contains a simple example demonstrating the use of Docker containers to reproduce the calibration 
+of a building energy simulation model.
 
-More details can be found in [our paper]():
+More details can be found in Section 6.3 of [our paper]():
 
 > Adrian Chong, Yaonan Gu and Hongyuan Jia, (2021).
 > *Calibrating building energy simulation models: A review of methods, inputs and outputs*.
 > *In Review*. <https://doi.org/xxx/xxx>
+
+## Citation
+
+Please cite this repository as:
+```
+@article{chong2021calibrating,
+  title={Calibrating building energy simulation models: A review of methods, inputs and outputs},
+  author={Chong, Adrian and Gu, Yaonan and Jia, Hongyuan},
+  year={2021},
+  note={In Review}
+}
+```
 
 ## How to access
 
