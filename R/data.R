@@ -21,8 +21,8 @@ extract_electricity <- function(idf) {
     # extract the annual electricity
     job$report_data(
         name = "Electricity:Building",
-        environment_name = "Singapore 2018",
-        year = 2018) %>%
+        environment_name = c("annual", "Philadelphia 2014"),
+        year = 2014) %>%
         # convert to kWh
         dplyr::mutate(value = j_to_kwh(value)) %>%
         dplyr::select(case, datetime, `electricity [kWh]` = value)
