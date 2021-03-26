@@ -278,7 +278,8 @@ space_param <- dplyr::tribble(
 
 # define setup values
 MU <- 4L      # number of individuals per generation
-LAMBDA <- 10L # number of generations
+LAMBDA <- 4L  # number of offspring
+MAX_GEN <- 20L # maximum of generation
 
 # define an ecr control object to store information on the objective function
 control <- ecr::initECRControl(calib_fitness, n.objectives = 2, minimize = TRUE)
@@ -334,7 +335,10 @@ repeat {
     ecr::updateLogger(log, pop, fit, MU)
 
     cli::cat_line("  * Check whether terminator conditions are met")
-    stop_obj <- ecr:::doTerminate(log, list(stopOnMeetCreteria(cvrmse = 0.3, nmbe = 0.1)))
+    stop_obj <- ecr:::doTerminate(log, list(
+        stopOnMeetCreteria(cvrmse = 0.3, nmbe = 0.1),
+        ecr::stopOnIters(MAX_GEN)
+    ))
 
     if (length(stop_obj) > 0L) {
         cat("Terminated:\n")
