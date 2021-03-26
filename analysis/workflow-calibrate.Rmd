@@ -301,7 +301,7 @@ pop <- ecr::initPopulation(
     lower = space_param$lower, upper = space_param$upper)
 
 # evaluate fitness of initial population
-fit <- evaluate_fitness(control, pop, 0)
+fit <- evaluate_fitness(control, pop, 0, workers = 4)
 
 # save fitness in population
 for (i in seq_along(pop)) attr(pop[[i]], "fitness") <- fit[, i]

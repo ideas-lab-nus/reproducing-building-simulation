@@ -82,19 +82,26 @@ evaluate_fitness <- function(control, inds, gen, workers = 1) {
     # add generation and individual index
     inds <- purrr::map2(inds, seq_along(inds), ~c(.x, gen, .y))
 
-    # use future framework to run in parallel
+    fun <- control$task$fitness.fun
+
     if (workers == 1L) {
         future::plan(future::sequential)
+
+        fit <- mapply(
+            function(ind) do.call(fun, as.list(ind)),
+            inds, SIMPLIFY = FALSE
+        )
+
+    # use future framework to run in parallel
     } else {
         future::plan(future::multisession, workers = workers)
         on.exit(future::plan(future::sequential), add = TRUE)
-    }
 
-    fun <- control$task$fitness.fun
-    fit <- future.apply::future_mapply(
-        function(ind) do.call(fun, as.list(ind)),
-        inds, SIMPLIFY = FALSE, future.seed = 1L
-    )
+        fit <- future.apply::future_mapply(
+            function(ind) do.call(fun, as.list(ind)),
+            inds, SIMPLIFY = FALSE, future.seed = 1L
+        )
+    }
 
     ecr:::makeFitnessMatrix(do.call(cbind, fit), control)
 }
