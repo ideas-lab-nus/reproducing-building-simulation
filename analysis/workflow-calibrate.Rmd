@@ -17,6 +17,9 @@ output:
 ---
 
 ```{r setup, include = FALSE}
+# By default, only show code
+knitr::opts_chunk$set(echo = TRUE, results = "hide")
+
 library(tidyverse, warn.conflicts = FALSE) # data analysis
 library(lubridate, warn.conflicts = FALSE) # work with date time
 library(eplusr)                            # integration with EnergyPlus
@@ -38,6 +41,9 @@ source(here("R/measures.R"))
 source(here("R/data.R"))
 # load fitness functions for optimization
 source(here("R/optim.R"))
+
+# for reproducibility
+set.seed(100)
 ```
 
 # Workflow
@@ -46,49 +52,154 @@ source(here("R/optim.R"))
 
 - The model we choose with brief description
 
+## Observed inputs, outputs and calibration parameters
+
+We choose AMY (Annual Meteorological Year) as the observed input.
+AMY together with other separate local weather variables are commonly used as
+the observed inputs for calibration.
+
+For calibration parameters, we select 7 commonly used ones for demonstration,
+including:
+
+- Material properties. Here materials include the exterior wall insulation and
+  exterior window
+- Infiltration rate
+- Occupancy density
+- Lighting power density
+- Electric equipment power density
+- Cooling setpoint
+- Heating setpoint
+
+The mapping between those parameters and corresponding EnergyPlus inputs for
+the baseline model are listed in the table blow:
+
+| #  | Calibration parameter            | Class                                | Object                               | Field                                      | Value    |
+|----+----------------------------------+--------------------------------------+--------------------------------------+--------------------------------------------+----------|
+| 1  | Material properties              | `Material`                           | `Steel Frame NonRes Wall Insulation` | `Conductivity {W/m-K}`                     | 0.049    |
+| 2  |                                  |                                      |                                      | `Density {kg/m3}`                          | 265.0    |
+| 3  |                                  |                                      |                                      | `Specific Heat {J/kg-K}`                   | 836.8    |
+| 4  |                                  | `WindowMaterial:SimpleGlazingSystem` | `NonRes Fixed Assembly Window`       | `U-Factor {W/m2-K}`                        | 3.237    |
+| 5  |                                  |                                      |                                      | `Solar Heat Gain Coefficient`              | 0.39     |
+| 6  | Infiltration rate                | `ZoneInfiltration:DesignFlowRate`    | All `*_Infiltration` objects         | `Flow per Exterior Surface Area {m3/s-m2}` | 0.000302 |
+| 7  | Occupancy density                | `People`                             | All objects for offices              | `Zone Floor Area per Person {m2/persion}`  | 18.58    |
+| 8  | Lighting power density           | `Lights`                             | All `*_Lights` objects for offices   | `Watts per Zone Floor Area {W/m2}`         | 10.76    |
+| 9  | Electric equipment power sensity | `ElectricEquipment`                  | All `*_Equip` objects for offices    | `Watts per Zone Floor Area {W/m2}`         | 10.76    |
+| 10 | Cooling setpoint                 | `Schedule:Compact`                   | `CLGSETP_SCH`                        | `Field 6`                                  | 24       |
+| 11 | Heating setpoint                 | `Schedule:Compact`                   | `HTGSETP_SCH`                        | `Field 6`                                  | 21       |
+
+For observed output, we choose hourly building electricity consumption. The
+corresponding output variable in EnergyPlus is `Electriity: Building` with
+`Hourly` reporting frequency.
+
 # Create the initial test model to be calibrated
 
-In order to create a test model for calibration, we modified the values of 6
-calibration parameters in the baseline model.
-
-## Read the baseline model
+## Read the model
 
 ```{r read-init}
-# read the baseline model as the starting point for the test model
-init <- read_idf(here("data/idf/base.idf"))
+# path of the model
+path <- here("data-raw/idf/RefBldgMediumOfficeNew2004_Chicago.idf")
+
+# read the model as the starting point for the test model
+init <- read_idf(path)
 ```
 
 ## Create the initial test model
 
-```{r create-init}
-update_material(init, conductivity = 0.8, density = 3800, specific_heat = 600)
-update_infiltration(init, infil = 1)
-update_people(init, people = 15)
-update_lights(init, lpd = 12)
-update_equip(init, epd = 10)
-update_setpoint(init, core = 26, perimeter = 25)
+In order to create a test model for calibration, we modified the values of 11
+calibration parameters in the model.
+
+```{r offset}
+offset <- 0.30
+lower <- 1 - offset
+upper <- 1 + offset
+```
+
+For demonstration, we set the initial parameter values before calibration to a
+random value in ± `r scales::percent(offset)` of the "real" value.
+
+```{r param-init}
+# actual parameter values in the model
+real_conductivity  <- 0.049
+real_density       <- 265.0
+real_specific_heat <- 836.8
+real_u_value       <- 3.237
+real_SHGC          <- 0.39
+real_infiltration  <- 0.000302
+real_people        <- 18.58
+real_lpd           <- 10.76
+real_epd           <- 10.76
+real_clg_sp        <- 24
+real_htg_sp        <- 21
+
+# initial parameter values for calibration
+init_conductivity  <- runif(1, real_conductivity  * lower, real_conductivity  * upper)
+init_density       <- runif(1, real_density       * lower, real_density       * upper)
+init_specific_heat <- runif(1, real_specific_heat * lower, real_specific_heat * upper)
+init_u_value       <- runif(1, real_u_value       * lower, real_u_value       * upper)
+init_SHGC          <- runif(1, real_SHGC          * lower, real_SHGC          * upper)
+init_infiltration  <- runif(1, real_infiltration  * lower, real_infiltration  * upper)
+init_people        <- runif(1, real_people        * lower, real_people        * upper)
+init_lpd           <- runif(1, real_lpd           * lower, real_lpd           * upper)
+init_epd           <- runif(1, real_epd           * lower, real_epd           * upper)
+init_clg_sp        <- runif(1, real_clg_sp        * lower, real_clg_sp        * upper)
+init_htg_sp        <- runif(1, real_htg_sp        * lower, real_htg_sp        * upper)
+```
+
+Below we made some necessary to the model, including adding the output meter and
+setting the begin year of `RunPeriod` objects based on our synthetic meter data.
+
+After this, we update the model based on the initial parameter values generated
+above and saved the model as `Init.idf` in the `data/idf` folder.
+
+```{r model-init}
+# remove all existing outputs
+init$`Output:Variable` <- NULL
+init$`Output:Meter` <- NULL
+
+# add hourly building electricity output meter
+init$add(Output_Meter = list("Electricity:Building", "Hourly"))
+
+# make sure weater file is used
+init$SimulationControl$Run_Simulation_for_Weather_File_Run_Periods <- "Yes"
+
+# update RunPeriod to correctly indicate an AMY EPW file is used
+init$RunPeriod$annual$set(
+    name = "Philadelphia 2014",
+    begin_year = 2014,
+    day_of_week_for_start_day = "Wednesday"
+)
+
+update_insulation(init,
+    conductivity = init_conductivity,
+    density = init_density,
+    specific_heat = init_specific_heat
+)
+update_window(init, u_value = init_u_value, SHGC = init_SHGC)
+update_infiltration(init, flow_per_area = init_infiltration)
+update_people(init, people = init_people)
+update_lights(init, lpd = init_lpd)
+update_equip(init, epd = init_epd)
+update_setpoint(init, cooling = init_clg_sp, heating = init_htg_sp)
 
 # save
-init$save(here("data/idf/init.idf"), overwrite = TRUE)
+init$save(here("data/idf/Init.idf"), overwrite = TRUE)
 ```
 
 # Evaluate the performance of the initial init model
 
-## Run initial simulation with IWEC
+## Run initial simulation with TMY3 weather
 
-```{r sim-initial}
-# read the initial test model
-init <- read_idf(here("data/idf/init.idf"))
-# get the file path of IWEC EPW file
-path_epw_iwec <- here("data-raw/epw/IWEC/SGP_Singapore.486980_IWEC.epw")
+```{r sim-init}
+# file path of TMY3 EPW file
+path_epw_tmy3 <- here("data-raw/epw/TMY3/PA_PHILADELPHIA_720304_14-13.epw")
 
 # run annual simulation
-init$run(path_epw_iwec, here("data/sim/init"), echo = FALSE)
+init$run(path_epw_tmy3, here("data/sim/Init"), echo = FALSE)
 ```
 
 ## Extract the simulation results
 
-```{r res-initial}
+```{r result-init}
 meter_init <- init %>% extract_electricity()
 ```
 
@@ -113,46 +224,61 @@ The initial NMBE and CV(RMSE) is `r stats_init["nmbe"]` and
 
 # Use AMY
 
-```{r run-amy}
+```{r model-amy}
 # read the initial test model
-init <- read_idf(here("data/idf/init.idf"))
+amy <- read_idf(here("data/idf/Init.idf"))
+
 # path of AMY EPW
-path_epw_amy <- here("data-raw/epw/AMY/SGP_SINGAPORE-CHANGI-AP_486980_18.epw")
+path_epw_amy <- here("data-raw/epw/AMY/PA_PHILADELPHIA_720304_14-13.epw")
 
 # run annual simulation
-init$run(path_epw_amy, here("data/sim/amy"), echo = FALSE)
+amy$run(path_epw_amy, here("data/sim/AMY"), echo = FALSE)
 ```
 
-```{r stats-amy}
-meter_amy <- init %>% extract_electricity()
+## Extract the simulation results
 
+```{r result-amy}
+meter_amy <- amy %>% extract_electricity()
+```
+
+## Visualize the trend
+
+```{r plot-amy}
+# select one week in July to examine the discrepancy
 meter_amy %>% weekly_compare(7, 1)
+```
 
+## Calculate the statistical indicators
+
+```{r stats-amy}
 stats_amy <- meter_amy %>% cal_stats()
 ```
 
-After using AMY EPW file, the CV(RMSE) is `r stats_amy["cvrmse"]` and `r stats_amy["nmbe"]`.
+Ater using the AMY weather file, the NMBE and CV(RMSE) is `r stats_amy["nmbe"]`
+and `r stats_amy["cvrmse"]`, respectively.
 
 # Use optimization to calibrate the model
 
 ```{r optim}
 # define the serach space of each parameter
 space_param <- dplyr::tribble(
-    ~parameter       , ~lower, ~upper,
-     "conductivity"  ,    0.5,   2.0 ,
-     "density"       ,   1000,  3000 ,
-     "specific_heat" ,    600,  1000 ,
-     "infil"         ,      0,    3  ,
-     "people"        ,      5,   15  ,
-     "lpd"           ,     10,   20  ,
-     "epd"           ,     10,   20  ,
-     "core"          ,     20,   26  ,
-     "perimeter"     ,     20,   26
+    ~parameter                 , ~lower                   , ~upper                   ,
+     "conductivity"            , real_conductivity  * lower , real_conductivity  * upper ,
+     "density"                 , real_density       * lower , real_density       * upper ,
+     "specific_heat"           , real_specific_heat * lower , real_specific_heat * upper ,
+     "u_value"                 , real_u_value       * lower , real_u_value       * upper ,
+     "SHGC"                    , real_SHGC          * lower , real_SHGC          * upper ,
+     "infiltration"            , real_infiltration  * lower , real_infiltration  * upper ,
+     "people"                  , real_people        * lower , real_people        * upper ,
+     "lpd"                     , real_lpd           * lower , real_lpd           * upper ,
+     "epd"                     , real_epd           * lower , real_epd           * upper ,
+     "cooling"                 , real_clg_sp        * lower , real_clg_sp        * upper ,
+     "heating"                 , real_htg_sp        * lower , real_htg_sp        * upper
 )
 
 # define setup values
-MU <- 2L     # number of individuals per generation
-LAMBDA <- 2L # number of generations
+MU <- 4L      # number of individuals per generation
+LAMBDA <- 10L # number of generations
 
 # define an ecr control object to store information on the objective function
 control <- ecr::initECRControl(calib_fitness, n.objectives = 2, minimize = TRUE)
@@ -192,7 +318,7 @@ repeat {
     offspring <- ecr::generateOffspring(control, pop, fit, LAMBDA, p.recomb = 0.7, p.mut = 0.1)
 
     cat("  * Evaluate fitness values\n")
-    fit_offspring <- evaluate_fitness(control, pop, log$env$n.gens)
+    fit_offspring <- evaluate_fitness(control, pop, log$env$n.gens, workers = 4)
 
     # save fitness in population
     for (i in seq_along(pop)) attr(pop[[i]], "fitness") <- fit[, i]

@@ -1,21 +1,30 @@
 # define a fitness function which takes all calibration parameters as input and
 # return the CV(RMSE) and NMBE as output
-calib_fitness <- function(conductivity, density, specific_heat, infil, people,
-                          lpd, epd, core, perimeter,
-                          gen, # generation index used to save model and results
-                          ind  # individual index used to save model and results
+calib_fitness <- function(
+    conductivity, density, specific_heat, # exterior wall insulation properties
+    u_value, SHGC,                        # exterior window properties
+    infiltration,                         # infiltration
+    people,                               # people density
+    lpd,                                  # lighting power density
+    epd,                                  # equipment power density
+    cooling, heating,                     # cooling and heating setpoint
+    gen,                                  # generation index used to save model and results
+    ind                                   # individual index used to save model and results
 ) {
+    # disable verbose information
+    eplusr::eplusr_option(verbose_info = FALSE)
+
     # read the initial model
-    idf <- eplusr::read_idf(here::here("data/idf/init.idf"))
+    idf <- eplusr::read_idf(here::here("data/idf/Init.idf"))
 
     # update calibration parameter based on input
-    update_material(idf, conductivity = conductivity, density = density,
-        specific_heat = specific_heat)
-    update_infiltration(idf, infil = infil)
+    update_insulation(idf, conductivity = conductivity, density = density, specific_heat = specific_heat)
+    update_window(idf, u_value = u_value, SHGC = SHGC)
+    update_infiltration(idf, flow_per_area = infiltration)
     update_people(idf, people = people)
     update_lights(idf, lpd = lpd)
     update_equip(idf, epd = epd)
-    update_setpoint(idf, core = core, perimeter = perimeter)
+    update_setpoint(idf, cooling = cooling, heating = heating)
 
     # save model into corresponding generation folder in 'data/idf'
     ## contruct generation folder
@@ -26,7 +35,7 @@ calib_fitness <- function(conductivity, density, specific_heat, infil, people,
     idf$save(here::here("data/idf", dir_gen, idf_ind), overwrite = TRUE)
 
     # run simulation
-    path_epw_amy <- here::here("data-raw/epw/AMY/SGP_SINGAPORE-CHANGI-AP_486980_18.epw")
+    path_epw_amy <- here("data-raw/epw/AMY/PA_PHILADELPHIA_720304_14-13.epw")
     ## contruct individual simulation output path
     dir_out <- here::here("data/sim", dir_gen, sprintf("%s_Ind%i", dir_gen, ind))
     ## run simulation with AMY
@@ -42,15 +51,17 @@ calib_fitness <- function(conductivity, density, specific_heat, infil, people,
                 gen, ind, stats["nmbe"], stats["cvrmse"]
             ),
             subtitle = paste0(
-                "Conductivity: "       , round(conductivity  , 2) , " W/m-K\n"     ,
-                "Density: "            , round(density       , 2) , " kg/m3\n"     ,
-                "Specific Heat: "      , round(specific_heat , 2) , " J/kg-K\n"    ,
-                "Infiltration Rate: "  , round(infil         , 2) , " 1/hour\n"    ,
-                "People Density: "     , round(people        , 2) , " m2/person\n" ,
-                "LPD: "                , round(lpd           , 2) , " W/m2\n"      ,
-                "EPD: "                , round(epd           , 2) , " W/m2\n"      ,
-                "Core Setpoint: "      , round(core          , 2) , " C\n"         ,
-                "Perimeter Setpoint: " , round(perimeter     , 2) , " C\n"
+                "Insulation Conductivity: "  , round(conductivity  , 2) , " W/m-K\n"     ,
+                "Insulation Density: "       , round(density       , 2) , " kg/m3\n"     ,
+                "Insulation Specific Heat: " , round(specific_heat , 2) , " J/kg-K\n"    ,
+                "Window U-Value: "           , round(u_value       , 3) , " W/m2-K\n"    ,
+                "Window SHGC: "              , round(SHGC          , 2) , "\n"           ,
+                "Infiltration Rate: "        , round(infiltration  , 6) , " m3/s-m2\n"   ,
+                "People Density: "           , round(people        , 2) , " m2/person\n" ,
+                "LPD: "                      , round(lpd           , 2) , " W/m2\n"      ,
+                "EPD: "                      , round(epd           , 2) , " W/m2\n"      ,
+                "Cooling Setpoint: "         , round(cooling       , 1) , " C\n"         ,
+                "Heating Setpoint: "         , round(heating       , 1) , " C\n"
             )
         )
     ## contruct individual plot path
@@ -67,14 +78,17 @@ calib_fitness <- function(conductivity, density, specific_heat, infil, people,
 }
 
 # define a function to evaluate the fitness in parallel
-evaluate_fitness <- function(control, inds, gen) {
+evaluate_fitness <- function(control, inds, gen, workers = 1) {
     # add generation and individual index
     inds <- purrr::map2(inds, seq_along(inds), ~c(.x, gen, .y))
 
     # use future framework to run in parallel
-    future::plan(future::sequential)
-    # future::plan(future::multisession, workers = 6)
-    # on.exit(future::plan(future::sequential), add = TRUE)
+    if (workers == 1L) {
+        future::plan(future::sequential)
+    } else {
+        future::plan(future::multisession, workers = workers)
+        on.exit(future::plan(future::sequential), add = TRUE)
+    }
 
     fun <- control$task$fitness.fun
     fit <- future.apply::future_mapply(
