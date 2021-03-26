@@ -191,7 +191,7 @@ init$save(here("data/idf/Init.idf"), overwrite = TRUE)
 
 ```{r sim-init}
 # file path of TMY3 EPW file
-path_epw_tmy3 <- here("data-raw/epw/TMY3/PA_PHILADELPHIA_720304_14-13.epw")
+path_epw_tmy3 <- here("data-raw/epw/TMY3/USA_PA_Philadelphia.Intl.AP.724080_TMY3.epw")
 
 # run annual simulation
 init$run(path_epw_tmy3, here("data/sim/Init"), echo = FALSE)
