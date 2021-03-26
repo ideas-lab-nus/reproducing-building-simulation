@@ -45,7 +45,9 @@ calib_fitness <- function(
     stats <- cal_stats(idf)
 
     # generate a plot with inputs and outputs
-    p <- weekly_compare(idf, month = 7, week = 1) +
+    ## mute the warnings about simulation errors
+    p <- suppressWarnings(weekly_compare(idf, month = 7, week = 1))
+    p <- p +
         ggplot2::labs(
             title = sprintf("Gen: %i, Ind: %i; NMBE: %s; CV(RMSE): %s",
                 gen, ind, stats["nmbe"], stats["cvrmse"]
@@ -73,6 +75,11 @@ calib_fitness <- function(
     ## save the plot
     ggplot2::ggsave(here::here("figures", dir_gen, png_ind),
         p, height = 6, width = 10, dpi = 300)
+
+    # if simulation errors, the stats will have been automatically reset to Inf
+    # hence, in this case change the results to large enough values to let the
+    # algorithm abandons this individual
+    stats[is.infinite(stats)] <- 1E9
 
     abs(stats)
 }

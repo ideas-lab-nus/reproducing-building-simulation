@@ -9,7 +9,8 @@ output:
         toc: yes
         toc_float:
             collapsed: false
-            smooth_scroll: false
+            smooth_scroll: true
+        highlight: tango
         fig_caption: yes
         theme:
             version: 4
@@ -262,18 +263,18 @@ and `r stats_amy["cvrmse"]`, respectively.
 ```{r optim}
 # define the serach space of each parameter
 space_param <- dplyr::tribble(
-    ~parameter                 , ~lower                   , ~upper                   ,
-     "conductivity"            , real_conductivity  * lower , real_conductivity  * upper ,
-     "density"                 , real_density       * lower , real_density       * upper ,
-     "specific_heat"           , real_specific_heat * lower , real_specific_heat * upper ,
-     "u_value"                 , real_u_value       * lower , real_u_value       * upper ,
-     "SHGC"                    , real_SHGC          * lower , real_SHGC          * upper ,
-     "infiltration"            , real_infiltration  * lower , real_infiltration  * upper ,
-     "people"                  , real_people        * lower , real_people        * upper ,
-     "lpd"                     , real_lpd           * lower , real_lpd           * upper ,
-     "epd"                     , real_epd           * lower , real_epd           * upper ,
-     "cooling"                 , real_clg_sp        * lower , real_clg_sp        * upper ,
-     "heating"                 , real_htg_sp        * lower , real_htg_sp        * upper
+    ~parameter       , ~real             , ~lower                     , ~upper                     ,
+     "conductivity"  , real_conductivity  , real_conductivity  * lower , real_conductivity  * upper ,
+     "density"       , real_density       , real_density       * lower , real_density       * upper ,
+     "specific_heat" , real_specific_heat , real_specific_heat * lower , real_specific_heat * upper ,
+     "u_value"       , real_u_value       , real_u_value       * lower , real_u_value       * upper ,
+     "SHGC"          , real_SHGC          , real_SHGC          * lower , real_SHGC          * upper ,
+     "infiltration"  , real_infiltration  , real_infiltration  * lower , real_infiltration  * upper ,
+     "people"        , real_people        , real_people        * lower , real_people        * upper ,
+     "lpd"           , real_lpd           , real_lpd           * lower , real_lpd           * upper ,
+     "epd"           , real_epd           , real_epd           * lower , real_epd           * upper ,
+     "cooling"       , real_clg_sp        , real_clg_sp        * lower , real_clg_sp        * upper ,
+     "heating"       , real_htg_sp        , real_htg_sp        * lower , real_htg_sp        * upper
 )
 
 # define setup values
@@ -350,8 +351,53 @@ repeat {
 result <- ecr:::makeECRResult(control, log, pop, fit, stop_obj)
 ```
 
+# Calibration results
+
+The final calibration results are shown in table blow.
+
+```{r res-calib, results = "asis"}
+result_param <- result$pareto.set %>%
+    transpose() %>%
+    map(unlist) %>%
+    set_names(space_param$parameter)
+
+result_stats <- result$pareto.set %>%
+    map(attr_getter("fitness")) %>%
+    transpose() %>%
+    map(unlist)
+
+result_calib <- bind_cols(result_param, result_stats) %>%
+    mutate(index = seq_len(n())) %>%
+    select(index, everything()) %>%
+    filter(nmbe != 1E9, cvrmse != 1E9)
+
+result_calib %>%
+    gt::gt() %>%
+    gt::fmt_number(2:ncol(result_calib)) %>%
+    gt::fmt_percent(vars(nmbe, cvrmse)) %>%
+    gt::tab_header(title = "Calibration results") %>%
+    gt::cols_label(
+        index = "#",
+        conductivity = gt::html("Insulation conductivity (W/(m K))"),
+        density = gt::html("Insulation density (kg/m<sup>3</sup>)"),
+        specific_heat = gt::html("Insulation specific heat (J/(kg K))"),
+        u_value = gt::html("Window U value [W/(m<sup>2</sup> K)]"),
+        SHGC = gt::html("Window SHGC"),
+        infiltration = gt::html("Infiltration per floor area (m<sup>3</sup>/(s m<sup>2</sup>))"),
+        people = gt::html("People density (m<sup>2</sup>/person)"),
+        lpd = gt::html("Lighting power density (W/m<sup>2</sup>)"),
+        epd = gt::html("Equipment power density (W/m<sup>2</sup>)"),
+        cooling = gt::html("Cooling setpoint (&deg;C)"),
+        heating = gt::html("Heating setpoint (&deg;C)"),
+        nmbe = "NMBE",
+        cvrmse = "CV(RMSE)") %>%
+    gt::tab_style(
+        style = gt::cell_text(weight = "bold"),
+        locations = gt::cells_column_labels(1:ncol(result_calib)))
+```
+
 # Session Info
 
-```{r session-info}
+```{r session-info, results = "markup"}
 sessionInfo()
 ```
