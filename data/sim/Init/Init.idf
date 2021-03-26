@@ -670,14 +670,14 @@ Schedule:Compact,
     Until: 06:00,            !- Field 3
     26.7,                    !- Field 4
     Until: 22:00,            !- Field 5
-    27.995211187005,         !- Field 6
+    26,                      !- Field 6
     Until: 24:00,            !- Field 7
     26.7,                    !- Field 8
     For: Saturday,           !- Field 9
     Until: 06:00,            !- Field 10
     26.7,                    !- Field 11
     Until: 18:00,            !- Field 12
-    24.0,                    !- Field 13
+    26,                      !- Field 13
     Until: 24:00,            !- Field 14
     26.7,                    !- Field 15
     For WinterDesignDay,     !- Field 16
@@ -695,7 +695,7 @@ Schedule:Compact,
     Until: 06:00,            !- Field 3
     15.6,                    !- Field 4
     Until: 22:00,            !- Field 5
-    26.4772859119345,        !- Field 6
+    21.5,                    !- Field 6
     Until: 24:00,            !- Field 7
     15.6,                    !- Field 8
     For SummerDesignDay,     !- Field 9
@@ -705,12 +705,12 @@ Schedule:Compact,
     Until: 06:00,            !- Field 13
     15.6,                    !- Field 14
     Until: 18:00,            !- Field 15
-    21.0,                    !- Field 16
+    21.5,                    !- Field 16
     Until: 24:00,            !- Field 17
     15.6,                    !- Field 18
     For: WinterDesignDay,    !- Field 19
     Until: 24:00,            !- Field 20
-    21.0,                    !- Field 21
+    21.5,                    !- Field 21
     For: AllOtherDays,       !- Field 22
     Until: 24:00,            !- Field 23
     15.6;                    !- Field 24
@@ -927,9 +927,9 @@ Material,
     Steel Frame NonRes Wall Insulation,  !- Name
     MediumRough,             !- Roughness
     0.0870564552646045,      !- Thickness {m}
-    0.0403556525020394,      !- Conductivity {W/m-K}
-    213.57252365211,         !- Density {kg/m3}
-    930.700430849939,        !- Specific Heat {J/kg-K}
+    0.0735,                  !- Conductivity {W/m-K}
+    397.5,                   !- Density {kg/m3}
+    1255.2,                  !- Specific Heat {J/kg-K}
     0.9,                     !- Thermal Absorptance
     0.7,                     !- Solar Absorptance
     0.7;                     !- Visible Absorptance
@@ -1101,8 +1101,8 @@ Material:NoMass,
 
 WindowMaterial:SimpleGlazingSystem,
     NonRes Fixed Assembly Window,  !- Name
-    3.01190624151472,        !- U-Factor {W/m2-K}
-    0.453142892279662;       !- Solar Heat Gain Coefficient
+    4.8555,                  !- U-Factor {W/m2-K}
+    0.6;                     !- Solar Heat Gain Coefficient
 
 
 !-   ===========  ALL OBJECTS IN CLASS: CONSTRUCTION ===========
@@ -4923,7 +4923,7 @@ People,
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
     ,                        !- People per Zone Floor Area {person/m2}
-    21.0060111301318,        !- Zone Floor Area per Person {m2/person}
+    25,                      !- Zone Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     AUTOCALCULATE,           !- Sensible Heat Fraction
     ACTIVITY_SCH,            !- Activity Level Schedule Name
@@ -4945,7 +4945,7 @@ People,
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
     ,                        !- People per Zone Floor Area {person/m2}
-    21.0060111301318,        !- Zone Floor Area per Person {m2/person}
+    25,                      !- Zone Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     AUTOCALCULATE,           !- Sensible Heat Fraction
     ACTIVITY_SCH,            !- Activity Level Schedule Name
@@ -4967,7 +4967,7 @@ People,
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
     ,                        !- People per Zone Floor Area {person/m2}
-    21.0060111301318,        !- Zone Floor Area per Person {m2/person}
+    25,                      !- Zone Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     AUTOCALCULATE,           !- Sensible Heat Fraction
     ACTIVITY_SCH,            !- Activity Level Schedule Name
@@ -4989,7 +4989,7 @@ People,
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
     ,                        !- People per Zone Floor Area {person/m2}
-    21.0060111301318,        !- Zone Floor Area per Person {m2/person}
+    25,                      !- Zone Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     AUTOCALCULATE,           !- Sensible Heat Fraction
     ACTIVITY_SCH,            !- Activity Level Schedule Name
@@ -5011,7 +5011,7 @@ People,
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
     ,                        !- People per Zone Floor Area {person/m2}
-    21.0060111301318,        !- Zone Floor Area per Person {m2/person}
+    25,                      !- Zone Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     AUTOCALCULATE,           !- Sensible Heat Fraction
     ACTIVITY_SCH,            !- Activity Level Schedule Name
@@ -5033,7 +5033,7 @@ People,
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
     ,                        !- People per Zone Floor Area {person/m2}
-    21.0060111301318,        !- Zone Floor Area per Person {m2/person}
+    25,                      !- Zone Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     AUTOCALCULATE,           !- Sensible Heat Fraction
     ACTIVITY_SCH,            !- Activity Level Schedule Name
@@ -5055,7 +5055,7 @@ People,
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
     ,                        !- People per Zone Floor Area {person/m2}
-    21.0060111301318,        !- Zone Floor Area per Person {m2/person}
+    25,                      !- Zone Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     AUTOCALCULATE,           !- Sensible Heat Fraction
     ACTIVITY_SCH,            !- Activity Level Schedule Name
@@ -5077,7 +5077,7 @@ People,
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
     ,                        !- People per Zone Floor Area {person/m2}
-    21.0060111301318,        !- Zone Floor Area per Person {m2/person}
+    25,                      !- Zone Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     AUTOCALCULATE,           !- Sensible Heat Fraction
     ACTIVITY_SCH,            !- Activity Level Schedule Name
@@ -5099,7 +5099,7 @@ People,
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
     ,                        !- People per Zone Floor Area {person/m2}
-    21.0060111301318,        !- Zone Floor Area per Person {m2/person}
+    25,                      !- Zone Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     AUTOCALCULATE,           !- Sensible Heat Fraction
     ACTIVITY_SCH,            !- Activity Level Schedule Name
@@ -5121,7 +5121,7 @@ People,
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
     ,                        !- People per Zone Floor Area {person/m2}
-    21.0060111301318,        !- Zone Floor Area per Person {m2/person}
+    25,                      !- Zone Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     AUTOCALCULATE,           !- Sensible Heat Fraction
     ACTIVITY_SCH,            !- Activity Level Schedule Name
@@ -5143,7 +5143,7 @@ People,
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
     ,                        !- People per Zone Floor Area {person/m2}
-    21.0060111301318,        !- Zone Floor Area per Person {m2/person}
+    25,                      !- Zone Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     AUTOCALCULATE,           !- Sensible Heat Fraction
     ACTIVITY_SCH,            !- Activity Level Schedule Name
@@ -5165,7 +5165,7 @@ People,
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
     ,                        !- People per Zone Floor Area {person/m2}
-    21.0060111301318,        !- Zone Floor Area per Person {m2/person}
+    25,                      !- Zone Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     AUTOCALCULATE,           !- Sensible Heat Fraction
     ACTIVITY_SCH,            !- Activity Level Schedule Name
@@ -5187,7 +5187,7 @@ People,
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
     ,                        !- People per Zone Floor Area {person/m2}
-    21.0060111301318,        !- Zone Floor Area per Person {m2/person}
+    25,                      !- Zone Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     AUTOCALCULATE,           !- Sensible Heat Fraction
     ACTIVITY_SCH,            !- Activity Level Schedule Name
@@ -5209,7 +5209,7 @@ People,
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
     ,                        !- People per Zone Floor Area {person/m2}
-    21.0060111301318,        !- Zone Floor Area per Person {m2/person}
+    25,                      !- Zone Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     AUTOCALCULATE,           !- Sensible Heat Fraction
     ACTIVITY_SCH,            !- Activity Level Schedule Name
@@ -5231,7 +5231,7 @@ People,
     Area/Person,             !- Number of People Calculation Method
     ,                        !- Number of People
     ,                        !- People per Zone Floor Area {person/m2}
-    21.0060111301318,        !- Zone Floor Area per Person {m2/person}
+    25,                      !- Zone Floor Area per Person {m2/person}
     0.3,                     !- Fraction Radiant
     AUTOCALCULATE,           !- Sensible Heat Fraction
     ACTIVITY_SCH,            !- Activity Level Schedule Name
@@ -5256,7 +5256,7 @@ Lights,
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    13.9357457482256,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.4,                     !- Return Air Fraction
     0.4,                     !- Fraction Radiant
@@ -5271,7 +5271,7 @@ Lights,
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    13.9357457482256,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.4,                     !- Return Air Fraction
     0.4,                     !- Fraction Radiant
@@ -5286,7 +5286,7 @@ Lights,
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    13.9357457482256,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.4,                     !- Return Air Fraction
     0.4,                     !- Fraction Radiant
@@ -5301,7 +5301,7 @@ Lights,
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    13.9357457482256,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.4,                     !- Return Air Fraction
     0.4,                     !- Fraction Radiant
@@ -5316,7 +5316,7 @@ Lights,
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    13.9357457482256,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.4,                     !- Return Air Fraction
     0.4,                     !- Fraction Radiant
@@ -5331,7 +5331,7 @@ Lights,
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    13.9357457482256,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.4,                     !- Return Air Fraction
     0.4,                     !- Fraction Radiant
@@ -5346,7 +5346,7 @@ Lights,
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    13.9357457482256,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.4,                     !- Return Air Fraction
     0.4,                     !- Fraction Radiant
@@ -5361,7 +5361,7 @@ Lights,
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    13.9357457482256,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.4,                     !- Return Air Fraction
     0.4,                     !- Fraction Radiant
@@ -5376,7 +5376,7 @@ Lights,
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    13.9357457482256,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.4,                     !- Return Air Fraction
     0.4,                     !- Fraction Radiant
@@ -5391,7 +5391,7 @@ Lights,
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    13.9357457482256,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.4,                     !- Return Air Fraction
     0.4,                     !- Fraction Radiant
@@ -5406,7 +5406,7 @@ Lights,
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    13.9357457482256,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.4,                     !- Return Air Fraction
     0.4,                     !- Fraction Radiant
@@ -5421,7 +5421,7 @@ Lights,
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    13.9357457482256,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.4,                     !- Return Air Fraction
     0.4,                     !- Fraction Radiant
@@ -5436,7 +5436,7 @@ Lights,
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    13.9357457482256,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.4,                     !- Return Air Fraction
     0.4,                     !- Fraction Radiant
@@ -5451,7 +5451,7 @@ Lights,
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    13.9357457482256,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.4,                     !- Return Air Fraction
     0.4,                     !- Fraction Radiant
@@ -5466,7 +5466,7 @@ Lights,
     BLDG_LIGHT_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Lighting Level {W}
-    13.9357457482256,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0.4,                     !- Return Air Fraction
     0.4,                     !- Fraction Radiant
@@ -5485,7 +5485,7 @@ ElectricEquipment,
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    9.98550711842812,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.5,                     !- Fraction Radiant
@@ -5498,7 +5498,7 @@ ElectricEquipment,
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    9.98550711842812,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.5,                     !- Fraction Radiant
@@ -5511,7 +5511,7 @@ ElectricEquipment,
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    9.98550711842812,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.5,                     !- Fraction Radiant
@@ -5524,7 +5524,7 @@ ElectricEquipment,
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    9.98550711842812,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.5,                     !- Fraction Radiant
@@ -5537,7 +5537,7 @@ ElectricEquipment,
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    9.98550711842812,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.5,                     !- Fraction Radiant
@@ -5550,7 +5550,7 @@ ElectricEquipment,
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    9.98550711842812,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.5,                     !- Fraction Radiant
@@ -5563,7 +5563,7 @@ ElectricEquipment,
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    9.98550711842812,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.5,                     !- Fraction Radiant
@@ -5576,7 +5576,7 @@ ElectricEquipment,
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    9.98550711842812,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.5,                     !- Fraction Radiant
@@ -5589,7 +5589,7 @@ ElectricEquipment,
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    9.98550711842812,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.5,                     !- Fraction Radiant
@@ -5602,7 +5602,7 @@ ElectricEquipment,
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    9.98550711842812,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.5,                     !- Fraction Radiant
@@ -5615,7 +5615,7 @@ ElectricEquipment,
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    9.98550711842812,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.5,                     !- Fraction Radiant
@@ -5628,7 +5628,7 @@ ElectricEquipment,
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    9.98550711842812,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.5,                     !- Fraction Radiant
@@ -5641,7 +5641,7 @@ ElectricEquipment,
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    9.98550711842812,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.5,                     !- Fraction Radiant
@@ -5654,7 +5654,7 @@ ElectricEquipment,
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    9.98550711842812,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.5,                     !- Fraction Radiant
@@ -5667,7 +5667,7 @@ ElectricEquipment,
     BLDG_EQUIP_SCH,          !- Schedule Name
     Watts/Area,              !- Design Level Calculation Method
     ,                        !- Design Level {W}
-    9.98550711842812,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.5,                     !- Fraction Radiant
@@ -5680,7 +5680,7 @@ ElectricEquipment,
     BLDG_ELEVATORS,          !- Schedule Name
     EquipmentLevel,          !- Design Level Calculation Method
     32109.8901098901,        !- Design Level {W}
-    9.98550711842812,        !- Watts per Zone Floor Area {W/m2}
+    20,                      !- Watts per Zone Floor Area {W/m2}
     ,                        !- Watts per Person {W/person}
     0,                       !- Fraction Latent
     0.5,                     !- Fraction Radiant
@@ -5698,7 +5698,7 @@ ZoneInfiltration:DesignFlowRate,
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
     ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000301583102665842,    !- Flow per Exterior Surface Area {m3/s-m2}
+    0,                       !- Flow per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -5712,7 +5712,7 @@ ZoneInfiltration:DesignFlowRate,
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
     ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000301583102665842,    !- Flow per Exterior Surface Area {m3/s-m2}
+    0,                       !- Flow per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -5726,7 +5726,7 @@ ZoneInfiltration:DesignFlowRate,
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
     ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000301583102665842,    !- Flow per Exterior Surface Area {m3/s-m2}
+    0,                       !- Flow per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -5740,7 +5740,7 @@ ZoneInfiltration:DesignFlowRate,
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
     ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000301583102665842,    !- Flow per Exterior Surface Area {m3/s-m2}
+    0,                       !- Flow per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -5754,7 +5754,7 @@ ZoneInfiltration:DesignFlowRate,
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
     ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000301583102665842,    !- Flow per Exterior Surface Area {m3/s-m2}
+    0,                       !- Flow per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -5768,7 +5768,7 @@ ZoneInfiltration:DesignFlowRate,
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
     ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000301583102665842,    !- Flow per Exterior Surface Area {m3/s-m2}
+    0,                       !- Flow per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -5782,7 +5782,7 @@ ZoneInfiltration:DesignFlowRate,
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
     ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000301583102665842,    !- Flow per Exterior Surface Area {m3/s-m2}
+    0,                       !- Flow per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -5796,7 +5796,7 @@ ZoneInfiltration:DesignFlowRate,
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
     ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000301583102665842,    !- Flow per Exterior Surface Area {m3/s-m2}
+    0,                       !- Flow per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -5810,7 +5810,7 @@ ZoneInfiltration:DesignFlowRate,
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
     ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000301583102665842,    !- Flow per Exterior Surface Area {m3/s-m2}
+    0,                       !- Flow per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -5824,7 +5824,7 @@ ZoneInfiltration:DesignFlowRate,
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
     ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000301583102665842,    !- Flow per Exterior Surface Area {m3/s-m2}
+    0,                       !- Flow per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -5838,7 +5838,7 @@ ZoneInfiltration:DesignFlowRate,
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
     ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000301583102665842,    !- Flow per Exterior Surface Area {m3/s-m2}
+    0,                       !- Flow per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -5852,7 +5852,7 @@ ZoneInfiltration:DesignFlowRate,
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
     ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000301583102665842,    !- Flow per Exterior Surface Area {m3/s-m2}
+    0,                       !- Flow per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -5866,7 +5866,7 @@ ZoneInfiltration:DesignFlowRate,
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
     ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000301583102665842,    !- Flow per Exterior Surface Area {m3/s-m2}
+    0,                       !- Flow per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -5880,7 +5880,7 @@ ZoneInfiltration:DesignFlowRate,
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
     ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000301583102665842,    !- Flow per Exterior Surface Area {m3/s-m2}
+    0,                       !- Flow per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient
@@ -5894,7 +5894,7 @@ ZoneInfiltration:DesignFlowRate,
     Flow/ExteriorArea,       !- Design Flow Rate Calculation Method
     ,                        !- Design Flow Rate {m3/s}
     ,                        !- Flow per Zone Floor Area {m3/s-m2}
-    0.000301583102665842,    !- Flow per Exterior Surface Area {m3/s-m2}
+    0,                       !- Flow per Exterior Surface Area {m3/s-m2}
     ,                        !- Air Changes per Hour {1/hr}
     1,                       !- Constant Term Coefficient
     0,                       !- Temperature Term Coefficient

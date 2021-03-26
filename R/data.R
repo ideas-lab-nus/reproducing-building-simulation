@@ -13,9 +13,8 @@ extract_electricity <- function(idf) {
         if (is.null(job)) stop("No simulation job found for input IDF.")
 
     } else if (is.character(idf)) {
-        # get the simulation SQLite from idf name
-        path_sql <- file.path(here("data/sim", idf, sprintf("%.sql", idf)))
-        job <- eplusr::eplus_sql(path_sql)
+        # directly get results from SQLite output
+        job <- eplusr::eplus_sql(idf)
     }
 
     # extract the annual electricity
@@ -38,8 +37,8 @@ weekly_compare <- function(meter, month = 7, week = 1) {
         dplyr::filter(month == !!month, ceiling(day / 7) == !!week) %>%
         ggplot2::ggplot(ggplot2::aes(datetime, `electricity [kWh]`, color = case)) +
         ggplot2::geom_line() +
-        ggplot2::scale_x_datetime(NULL, date_labels = "%b %d %a") +
-        ggplot2::scale_y_continuous("Electricity [kWh]", limits = c(0, 200)) +
+        ggplot2::scale_x_datetime(NULL, date_labels = "%b %d %a", date_breaks = "1 day") +
+        ggplot2::scale_y_continuous("Electricity / kWh", limits = c(0, 210)) +
         ggplot2::theme_bw()
 }
 

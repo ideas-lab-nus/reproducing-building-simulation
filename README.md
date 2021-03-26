@@ -5,7 +5,7 @@
 This repository contains a simple example demonstrating the use of Docker containers to reproduce the calibration 
 of a building energy simulation model.
 
-More details can be found in Section 6.3 of [our paper]():
+More details can be found in Section 6.3 of [our paper](https://github.com/ideas-lab-nus/calibrating-building-simulation-review):
 
 > Adrian Chong, Yaonan Gu and Hongyuan Jia, (2021).
 > *Calibrating building energy simulation models: A review of methods, inputs and outputs*.
@@ -73,3 +73,9 @@ The main files are:
 | [`figures/`](https://github.com/ideas-lab-nus/reproducing-building-simulation/blob/master/figures)                                              | Plots generated during the calibration process, including one line plot per simulation comparing the synthetic meter data and simulation data.                      |
 | [`report/workfow-calibrate.html`](https://github.com/ideas-lab-nus/reproducing-building-simulation/blob/main/analysis/workflow-synthetic.html)  | The rendered [`workflow-synthetic.Rmd`](https://github.com/ideas-lab-nus/reproducing-building-simulation/blob/main/analysis/workflow-synthetic.Rmd) in HTML format. |
 | [`report/workfow-calibrate.html`](https://github.com/ideas-lab-nus/reproducing-building-simulation/blob/main/analysis/workflow-calibrate.html)  | The rendered [`workflow-calibrate.Rmd`](https://github.com/ideas-lab-nus/reproducing-building-simulation/blob/main/analysis/workflow-calibrate.Rmd) in HTML format. |
+
+## Licenses
+
+**Code :** [MIT](https://github.com/ideas-lab-nus/reproducing-building-simulation/blob/main/LICENSE) license
+
+**Data :** [CC-0](http://creativecommons.org/publicdomain/zero/1.0/) attribution requested in reuse

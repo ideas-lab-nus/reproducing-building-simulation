@@ -42,18 +42,15 @@ source(here("R/measures.R"))
 source(here("R/data.R"))
 # load fitness functions for optimization
 source(here("R/optim.R"))
-
-# for reproducibility
-set.seed(1)
 ```
 
-# Workflow
+# Building energy model description
 
-<!-- Create a workflow diagram? -->
+A short description has been given in the
+[Synthetic meter data creation](https://github.com/ideas-lab-nus/reproducing-building-simulation/blob/main/analysis/workflow-synthetic.Rmd)
+workflow.
 
-- The model we choose with brief description
-
-## Observed inputs, outputs and calibration parameters
+# Observed inputs, outputs and calibration parameters
 
 We choose AMY (Annual Meteorological Year) as the observed input.
 AMY together with other separate local weather variables are commonly used as
@@ -85,8 +82,8 @@ the baseline model are listed in the table blow:
 | 7  | Occupancy density                | `People`                             | All objects for offices              | `Zone Floor Area per Person {m2/persion}`  | 18.58    |
 | 8  | Lighting power density           | `Lights`                             | All `*_Lights` objects for offices   | `Watts per Zone Floor Area {W/m2}`         | 10.76    |
 | 9  | Electric equipment power sensity | `ElectricEquipment`                  | All `*_Equip` objects for offices    | `Watts per Zone Floor Area {W/m2}`         | 10.76    |
-| 10 | Cooling setpoint                 | `Schedule:Compact`                   | `CLGSETP_SCH`                        | `Field 6`                                  | 24       |
-| 11 | Heating setpoint                 | `Schedule:Compact`                   | `HTGSETP_SCH`                        | `Field 6`                                  | 21       |
+| 10 | Cooling setpoint                 | `Schedule:Compact`                   | `CLGSETP_SCH`                        | `Field 6` and `Field 13`                   | 24       |
+| 11 | Heating setpoint                 | `Schedule:Compact`                   | `HTGSETP_SCH`                        | `Field 6`, `Field 16` and `Field 21`       | 21       |
 
 For observed output, we choose hourly building electricity consumption. The
 corresponding output variable in EnergyPlus is `Electriity: Building` with
@@ -109,14 +106,8 @@ init <- read_idf(path)
 In order to create a test model for calibration, we modified the values of 11
 calibration parameters in the model.
 
-```{r offset}
-offset <- 0.30
-lower <- 1 - offset
-upper <- 1 + offset
-```
-
 For demonstration, we set the initial parameter values before calibration to a
-random value in ± `r scales::percent(offset)` of the "real" value.
+random value in predefined ranges.
 
 ```{r param-init}
 # actual parameter values in the model
@@ -132,18 +123,69 @@ real_epd           <- 10.76
 real_clg_sp        <- 24
 real_htg_sp        <- 21
 
+# define the upper and lower offset
+offset <- 0.50
+lower <- 1 - offset
+upper <- 1 + offset
+
+# define the lower and upper limits of parameters
+param <- dplyr::tribble(
+    ~parameter       , ~real              , ~lower                     , ~upper                     ,
+     "conductivity"  , real_conductivity  , real_conductivity  * lower , real_conductivity  * upper ,
+     "density"       , real_density       , real_density       * lower , real_density       * upper ,
+     "specific_heat" , real_specific_heat , real_specific_heat * lower , real_specific_heat * upper ,
+     "u_value"       , real_u_value       , real_u_value       * lower , real_u_value       * upper ,
+     "SHGC"          , real_SHGC          , 0.1                        , 0.6                        ,
+     "infiltration"  , real_infiltration  , 0                          , 0.0005                     ,
+     "people"        , real_people        , 10                         , 25                         ,
+     "lpd"           , real_lpd           , 2                          , 20                         ,
+     "epd"           , real_epd           , 2                          , 20                         ,
+     "cooling"       , real_clg_sp        , 22                         , 26                         ,
+     "heating"       , real_htg_sp        , 15                         , 21.5
+)
+
+# for reproducibility
+set.seed(4)
+
 # initial parameter values for calibration
-init_conductivity  <- runif(1, real_conductivity  * lower, real_conductivity  * upper)
-init_density       <- runif(1, real_density       * lower, real_density       * upper)
-init_specific_heat <- runif(1, real_specific_heat * lower, real_specific_heat * upper)
-init_u_value       <- runif(1, real_u_value       * lower, real_u_value       * upper)
-init_SHGC          <- runif(1, real_SHGC          * lower, real_SHGC          * upper)
-init_infiltration  <- runif(1, real_infiltration  * lower, real_infiltration  * upper)
-init_people        <- runif(1, real_people        * lower, real_people        * upper)
-init_lpd           <- runif(1, real_lpd           * lower, real_lpd           * upper)
-init_epd           <- runif(1, real_epd           * lower, real_epd           * upper)
-init_clg_sp        <- runif(1, real_clg_sp        * lower, real_clg_sp        * upper)
-init_htg_sp        <- runif(1, real_htg_sp        * lower, real_htg_sp        * upper)
+param <- param %>%
+    mutate(init = map2_dbl(lower, upper, runif, n = 1L)) %>%
+    select(parameter, real, init, everything())
+```
+
+The ranges and initial values of parameters are listed in the table below.
+
+```{r param, results = "asis"}
+tbl_param <- param %>%
+    mutate(name = c(
+        "Insulation conductivity (W/(m K))",
+        "Insulation density (kg/m<sup>3</sup>)",
+        "Insulation specific heat (J/(kg K))",
+        "Window U value [W/(m<sup>2</sup> K)]",
+        "Window SHGC",
+        "Infiltration per floor area (m<sup>3</sup>/(s m<sup>2</sup>))",
+        "People density (m<sup>2</sup>/person)",
+        "Lighting power density (W/m<sup>2</sup>)",
+        "Equipment power density (W/m<sup>2</sup>)",
+        "Cooling setpoint (&deg;C)",
+        "Heating setpoint (&deg;C)")) %>%
+    select(name, parameter, everything())
+
+tbl_param %>%
+    gt::gt() %>%
+    gt::cols_hide(vars(real)) %>%
+    gt::fmt_number(vars(init, lower, upper)) %>%
+    gt::tab_header(title = "List of calibration parameters and their ranges") %>%
+    gt::cols_label(
+        name = "Calibration parameter",
+        parameter = "Symbol",
+        init = "Initial value",
+        lower = "Min",
+        upper = "Max") %>%
+    gt::fmt_markdown(vars(name)) %>%
+    gt::tab_style(
+        style = gt::cell_text(weight = "bold"),
+        locations = gt::cells_column_labels(everything()))
 ```
 
 Below we made some necessary to the model, including adding the output meter and
@@ -170,17 +212,19 @@ init$RunPeriod$annual$set(
     day_of_week_for_start_day = "Wednesday"
 )
 
+init_val <- function(var) param %>% filter(parameter == !!var) %>% pull()
+
 update_insulation(init,
-    conductivity = init_conductivity,
-    density = init_density,
-    specific_heat = init_specific_heat
+    conductivity = init_val("conductivity"),
+    density = init_val("density"),
+    specific_heat = init_val("specific_heat")
 )
-update_window(init, u_value = init_u_value, SHGC = init_SHGC)
-update_infiltration(init, flow_per_area = init_infiltration)
-update_people(init, people = init_people)
-update_lights(init, lpd = init_lpd)
-update_equip(init, epd = init_epd)
-update_setpoint(init, cooling = init_clg_sp, heating = init_htg_sp)
+update_window(init, u_value = init_val("u_value"), SHGC = init_val("SHGC"))
+update_infiltration(init, flow_per_area = init_val("infiltration"))
+update_people(init, people = init_val("people"))
+update_lights(init, lpd = init_val("lpd"))
+update_equip(init, epd = init_val("epd"))
+update_setpoint(init, cooling = init_val("cooling"), heating = init_val("heating"))
 
 # save
 init$save(here("data/idf/Init.idf"), overwrite = TRUE)
@@ -206,9 +250,13 @@ meter_init <- init %>% extract_electricity()
 
 ## Visualize the trend
 
-```{r plot-init}
+```{r plot-init, results = "asis", fig.cap = "One week electricity comparison between synthetic data and simulation"}
 # select one week in July to examine the discrepancy
-meter_init %>% weekly_compare(7, 1)
+plot_init <- meter_init %>% weekly_compare(7, 1)
+
+ggsave(here("figures/Init.png"), plot_init, height = 6, width = 10, dpi = 300)
+
+knitr::include_graphics(here("figures/Init.png"))
 ```
 
 ## Calculate the statistical indicators
@@ -244,9 +292,13 @@ meter_amy <- amy %>% extract_electricity()
 
 ## Visualize the trend
 
-```{r plot-amy}
+```{r plot-amy, results = "asis", fig.cap = "One week electricity comparison between synthetic data and simulation after using AMY weather"}
 # select one week in July to examine the discrepancy
-meter_amy %>% weekly_compare(7, 1)
+plot_init <- meter_amy %>% weekly_compare(7, 1)
+
+ggsave(here("figures/AMY.png"), plot_init, height = 6, width = 10, dpi = 300)
+
+knitr::include_graphics(here("figures/AMY.png"))
 ```
 
 ## Calculate the statistical indicators
@@ -261,26 +313,14 @@ and `r stats_amy["cvrmse"]`, respectively.
 # Use optimization to calibrate the model
 
 ```{r optim}
-# define the serach space of each parameter
-space_param <- dplyr::tribble(
-    ~parameter       , ~real             , ~lower                     , ~upper                     ,
-     "conductivity"  , real_conductivity  , real_conductivity  * lower , real_conductivity  * upper ,
-     "density"       , real_density       , real_density       * lower , real_density       * upper ,
-     "specific_heat" , real_specific_heat , real_specific_heat * lower , real_specific_heat * upper ,
-     "u_value"       , real_u_value       , real_u_value       * lower , real_u_value       * upper ,
-     "SHGC"          , real_SHGC          , real_SHGC          * lower , real_SHGC          * upper ,
-     "infiltration"  , real_infiltration  , real_infiltration  * lower , real_infiltration  * upper ,
-     "people"        , real_people        , real_people        * lower , real_people        * upper ,
-     "lpd"           , real_lpd           , real_lpd           * lower , real_lpd           * upper ,
-     "epd"           , real_epd           , real_epd           * lower , real_epd           * upper ,
-     "cooling"       , real_clg_sp        , real_clg_sp        * lower , real_clg_sp        * upper ,
-     "heating"       , real_htg_sp        , real_htg_sp        * lower , real_htg_sp        * upper
-)
-
 # define setup values
-MU <- 4L      # number of individuals per generation
-LAMBDA <- 4L  # number of offspring
-MAX_GEN <- 20L # maximum of generation
+MU <- 4L          # number of individuals per generation
+LAMBDA <- 4L      # number of offspring
+MAX_GEN <- 20L    # maximum of generation
+MAX_CVRMSE <- 0.3 # creteria for CVRMSE
+MAX_NMBE <- 0.1   # creteria for NMBE
+P_MUTATE <- 0.1   # mutation probability
+P_RECOMB <- 0.7   # crossover probability
 
 # define an ecr control object to store information on the objective function
 control <- ecr::initECRControl(calib_fitness, n.objectives = 2, minimize = TRUE)
@@ -292,90 +332,114 @@ pareto <- ecr::initParetoArchive(control)
 # set evolutionary operators
 # use no priors and set all parameters to follow uniform distribution
 control <- ecr::registerECROperator(control, "mutate", ecr::mutUniform,
-    lower = space_param$lower, upper = space_param$upper)
+    lower = param$lower, upper = param$upper)
 control <- ecr::registerECROperator(control, "recombine", ecr::recCrossover)
-control <- ecr::registerECROperator(control, "selectForMating", ecr::selSimple )
+control <- ecr::registerECROperator(control, "selectForMating", ecr::selSimple)
 control <- ecr::registerECROperator(control, "selectForSurvival", ecr::selNondom)
 
 # initialize population of MU random values
 pop <- ecr::initPopulation(
-    MU, ecr::genReal, n.dim = nrow(space_param),
-    lower = space_param$lower, upper = space_param$upper)
+    MU, ecr::genReal, n.dim = nrow(param),
+    lower = param$lower, upper = param$upper)
 
 # evaluate fitness of initial population
-fit <- evaluate_fitness(control, pop, 0, workers = 4)
-
-# save fitness in population
-for (i in seq_along(pop)) attr(pop[[i]], "fitness") <- fit[, i]
+fit <- evaluate_fitness(control, pop, 1, workers = 4)
 
 # update log
 ecr::updateLogger(log, pop, fit, MU)
 
 # run evolutionary loop
 repeat {
-    cat(sprintf("Generation [%i]\n", log$env$n.gens))
-
     # generate offspring
-    cat("  * Generate offspring\n")
-    offspring <- ecr::generateOffspring(control, pop, fit, LAMBDA, p.recomb = 0.7, p.mut = 0.1)
+    offspring <- ecr::generateOffspring(control, pop, fit, LAMBDA, p.recomb = P_RECOMB, p.mut = P_MUTATE)
 
-    cat("  * Evaluate fitness values\n")
-    fit_offspring <- evaluate_fitness(control, pop, log$env$n.gens, workers = 4)
+    # evaluate fitness of the offspring
+    fit_offspring <- evaluate_fitness(control, offspring, log$env$n.gens + 1L, workers = 4)
 
-    # save fitness in population
-    for (i in seq_along(pop)) attr(pop[[i]], "fitness") <- fit[, i]
+    # do logging
+    ecr::updateLogger(log, offspring, fit_offspring, MU)
 
-    cat("  * Prepare next generation\n")
+    # prepare next generation
     res <- ecr::replaceMuPlusLambda(control, pop, offspring, fit, fit_offspring)
 
+    # extract population and fitness
     pop <- res$population
     fit <- res$fitness
 
-    # do some logging
-    cat("  * Update log\n")
-    ecr::updateLogger(log, pop, fit, MU)
+    # update pareto archieve
+    ecr::updateParetoArchive(pareto, pop, fit)
 
-    cli::cat_line("  * Check whether terminator conditions are met")
+    # check whether terminator conditions are met
     stop_obj <- ecr:::doTerminate(log, list(
-        stopOnMeetCreteria(cvrmse = 0.3, nmbe = 0.1),
+        # stop if CVRMSE <= 30% and NMBE <= 10%
+        stopOnMeetCreteria(cvrmse = MAX_CVRMSE, nmbe = MAX_NMBE),
+        # stop if max generation matched
         ecr::stopOnIters(MAX_GEN)
     ))
 
-    if (length(stop_obj) > 0L) {
-        cat("Terminated:\n")
-        cat(sprintf("  < %s: %s >\n", stop_obj$name, stop_obj$message))
-        break
-    }
+    # stop if creteria are met
+    if (length(stop_obj) > 0L) break
 }
 
+# extract optimization results
 result <- ecr:::makeECRResult(control, log, pop, fit, stop_obj)
 ```
 
 # Calibration results
 
-The final calibration results are shown in table blow.
+## Pareto front
+
+After the optimization completed, we extracted all the population together with
+the fitness values, and saved them into a table in `data/population.csv`.
+The `is_pareto` column indicates whether current individual is a Pareto front or
+not.
+
+```{r res-opt, results = "asis"}
+# get unique Pareto front
+front <- get_front(pareto)
+
+# get all population together with fitness
+population <- get_population(log)
+# rename columns using parameter names
+names(population)[seq_len(nrow(param)) + 2L] <- param$parameter
+# save results
+write_csv(population, here("data/population.csv"))
+```
+
+The figure blow shows the distribution of the Pareto front. Since we use
+synthetic meta data and models that only vary several parameters, it only takes
+`r log$env$n.gens` generations for the NSGA-II algorithm to converge.
+
+```{r plot-opt, results = "asis", fig.cap = "Pareto front of optimization"}
+# plot Pareto front
+plot_pareto <- population %>%
+    ggplot(aes(nmbe, cvrmse)) +
+    geom_rect(aes(xmin = 0, xmax = MAX_NMBE, ymin = 0, ymax = MAX_CVRMSE),
+        color = "grey70", size = 1, linetype = 2, fill = "grey90", alpha = 0.1) +
+    geom_point() +
+    geom_point(data = front, color = "red") +
+    scale_x_continuous("NMBE / %", labels = scales::label_percent(),
+        breaks = seq(0, 1, 0.1), expand = c(0, 0), limits = c(0, max(population$nmbe) * 1.05)) +
+    scale_y_continuous("CV(RMSE) / %", labels = scales::label_percent(),
+        breaks = seq(0, 1, 0.1), expand = c(0, 0), limits = c(0, max(population$cvrmse) * 1.05)) +
+    theme_bw()
+
+ggsave(here::here("figures/pareto.png"), plot_pareto, height = 6, width = 6, dpi = 300)
+
+knitr::include_graphics(here("figures/pareto.png"))
+```
+
+## Distribution of calibrated parameters
 
 ```{r res-calib, results = "asis"}
-result_param <- result$pareto.set %>%
-    transpose() %>%
-    map(unlist) %>%
-    set_names(space_param$parameter)
-
-result_stats <- result$pareto.set %>%
-    map(attr_getter("fitness")) %>%
-    transpose() %>%
-    map(unlist)
-
-result_calib <- bind_cols(result_param, result_stats) %>%
+population %>%
+    filter(is_pareto) %>%
+    distinct(!!!syms(c(param$parameter, "nmbe", "cvrmse"))) %>%
     mutate(index = seq_len(n())) %>%
     select(index, everything()) %>%
-    filter(nmbe != 1E9, cvrmse != 1E9)
-
-result_calib %>%
     gt::gt() %>%
-    gt::fmt_number(2:ncol(result_calib)) %>%
+    gt::fmt_number(all_of(param$parameter)) %>%
     gt::fmt_percent(vars(nmbe, cvrmse)) %>%
-    gt::tab_header(title = "Calibration results") %>%
     gt::cols_label(
         index = "#",
         conductivity = gt::html("Insulation conductivity (W/(m K))"),
@@ -393,7 +457,17 @@ result_calib %>%
         cvrmse = "CV(RMSE)") %>%
     gt::tab_style(
         style = gt::cell_text(weight = "bold"),
-        locations = gt::cells_column_labels(1:ncol(result_calib)))
+        locations = gt::cells_column_labels(everything()))
+```
+
+```{r plot-calib, results = "asis"}
+population %>%
+    filter(is_pareto) %>%
+    distinct(!!!syms(c(param$parameter, "nmbe", "cvrmse")), .keep_all = TRUE) %>%
+    select(index_gen, index_ind, nmbe, cvrmse) %>%
+    mutate(path_plot = here(sprintf("figures/Gen%i/Gen%i_Ind%i.png", index_gen, index_gen, index_ind))) %>%
+    pull(path_plot) %>%
+    knitr::include_graphics()
 ```
 
 # Session Info

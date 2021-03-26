@@ -35,7 +35,7 @@ calib_fitness <- function(
     idf$save(here::here("data/idf", dir_gen, idf_ind), overwrite = TRUE)
 
     # run simulation
-    path_epw_amy <- here("data-raw/epw/AMY/PA_PHILADELPHIA_720304_14-13.epw")
+    path_epw_amy <- here::here("data-raw/epw/AMY/PA_PHILADELPHIA_720304_14-13.epw")
     ## contruct individual simulation output path
     dir_out <- here::here("data/sim", dir_gen, sprintf("%s_Ind%i", dir_gen, ind))
     ## run simulation with AMY
@@ -129,4 +129,49 @@ stopOnMeetCreteria <- function(cvrmse = 0.3, nmbe = 0.1) {
         name = "MeetCalibrationCreteria",
         message = sprintf("Calibration creteria (CVRMSE=%s, NMBE=%s) has been met", cvrmse, nmbe)
     )
+}
+
+# define a function to extract Pareto front into a data.frame
+get_front <- function(archive) {
+    archive %>%
+        ecr::getFront() %>%
+        t() %>%
+        dplyr::as_tibble() %>%
+        dplyr::distinct()
+}
+
+# define a function to extract all individual fitness
+get_all_fitness <- function(log) {
+    log %>%
+        ecr::getPopulations() %>%
+        purrr::map("fitness") %>%
+        purrr::map(~t(.) %>% dplyr::as_tibble()) %>%
+        dplyr::bind_rows() %>%
+        dplyr::mutate(dplyr::across(everything(), as.double))
+}
+
+# define a function to extract the population together with fitness
+get_population <- function(log) {
+    fitness <- get_all_fitness(log)
+
+    pop <- log %>%
+        ecr::getPopulations() %>%
+        purrr::map("population") %>%
+        purrr::map(
+            ~purrr::transpose(.) %>%
+             map(unlist) %>%
+             set_names(sprintf("param%i", seq_along(.))) %>%
+             dplyr::bind_cols() %>%
+             dplyr::mutate(index_ind = seq_len(dplyr::n())) %>%
+             dplyr::select(index_ind, dplyr::everything())
+        )
+
+    index_gen <- rep(seq_along(pop), pop %>% purrr::map_int(nrow))
+
+    pop <- pop %>%
+        dplyr::bind_rows() %>%
+        dplyr::mutate(index_gen = index_gen) %>%
+        dplyr::select(index_gen, dplyr::everything()) %>%
+        dplyr::bind_cols(fitness) %>%
+        dplyr::mutate(is_pareto = ecr::nondominated(t(as.matrix(fitness))))
 }
