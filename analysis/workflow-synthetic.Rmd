@@ -17,11 +17,8 @@ output:
 ---
 
 ```{r setup, include = FALSE}
-# By default, only show code
-knitr::opts_chunk$set(
-    echo = TRUE,
-    results = "hide"
-)
+# by default, only show code
+knitr::opts_chunk$set(echo = TRUE, results = "hide")
 
 library(tidyverse, warn.conflicts = FALSE) # data analysis
 library(eplusr)                            # integration with EnergyPlus

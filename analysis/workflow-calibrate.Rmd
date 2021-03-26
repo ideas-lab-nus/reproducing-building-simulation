@@ -17,7 +17,7 @@ output:
 ---
 
 ```{r setup, include = FALSE}
-# By default, only show code
+# by default, only show code
 knitr::opts_chunk$set(echo = TRUE, results = "hide")
 
 library(tidyverse, warn.conflicts = FALSE) # data analysis
@@ -43,7 +43,7 @@ source(here("R/data.R"))
 source(here("R/optim.R"))
 
 # for reproducibility
-set.seed(100)
+set.seed(1)
 ```
 
 # Workflow

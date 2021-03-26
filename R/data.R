@@ -45,14 +45,29 @@ weekly_compare <- function(meter, month = 7, week = 1) {
 
 # function to get the NMBE and CVRMSE from simulation results
 cal_stats <- function(meter) {
-    if (!is.data.frame(meter)) meter <- extract_electricity(meter)
+    if (!is.data.frame(meter)) {
+        meter <- tryCatch(
+            extract_electricity(meter),
+            # in case errors
+            warning = function(w) {
+                if (grepl("Simulation ended with errors", conditionMessage(w))) {
+                    NULL
+                }
+            }
+        )
+    }
 
     synthetic <- read_measured()
 
-    res <- c(
-        nmbe = nmbe(meter$`electricity [kWh]`, synthetic$`electricity [kWh]`),
-        cvrmse = cvrmse(meter$`electricity [kWh]`, synthetic$`electricity [kWh]`)
-    )
+    if (is.null(meter)) {
+        res <- c(nmbe = Inf, cvrmse = Inf)
+    } else {
+        stopifnot(nrow(meter) == nrow(synthetic))
+        res <- c(
+            nmbe = nmbe(meter$`electricity [kWh]`, synthetic$`electricity [kWh]`),
+            cvrmse = cvrmse(meter$`electricity [kWh]`, synthetic$`electricity [kWh]`)
+        )
+    }
 
     formattable::percent(res)
 }

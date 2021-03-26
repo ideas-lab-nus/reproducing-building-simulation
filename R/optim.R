@@ -93,7 +93,7 @@ evaluate_fitness <- function(control, inds, gen, workers = 1) {
     fun <- control$task$fitness.fun
     fit <- future.apply::future_mapply(
         function(ind) do.call(fun, as.list(ind)),
-        inds, SIMPLIFY = FALSE, future.seed = TRUE
+        inds, SIMPLIFY = FALSE, future.seed = 1L
     )
 
     ecr:::makeFitnessMatrix(do.call(cbind, fit), control)
