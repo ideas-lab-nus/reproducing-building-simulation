@@ -12,9 +12,7 @@ output:
             smooth_scroll: true
         highlight: tango
         fig_caption: yes
-        theme:
-            version: 4
-            bootswath: flatly
+        theme: flatly
 ---
 
 ```{r setup, include = FALSE}
