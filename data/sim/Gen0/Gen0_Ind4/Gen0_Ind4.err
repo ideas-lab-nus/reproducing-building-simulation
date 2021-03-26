@@ -1,0 +1,181 @@
+Program Version,EnergyPlus, Version 9.1.0-08d2e308bb, YMD=2021.03.26 14:58,
+   ************* Beginning Zone Sizing Calculations
+   ** Warning ** Weather file location will be used rather than entered (IDF) Location object.
+   **   ~~~   ** ..Location object=USA IL-CHICAGO-OHARE
+   **   ~~~   ** ..Weather File Location=PHILADELPHIA - USA Custom-720304 WMO#=720304
+   **   ~~~   ** ..due to location differences, Latitude difference=[1.63] degrees, Longitude difference=[12.49] degrees.
+   **   ~~~   ** ..Time Zone difference=[1.0] hour(s), Elevation difference=[51.58] percent, [98.00] meters.
+   ** Warning ** UpdateZoneSizing: Cooling supply air temperature (calculated) within 5C of zone temperature
+   **   ~~~   ** ...check zone thermostat set point and design supply air temperatures
+   **   ~~~   ** ...zone name = CORE_BOTTOM
+   **   ~~~   ** ...design sensible cooling load = 57160.98 W
+   **   ~~~   ** ...thermostat set point temp    = 0.000 C
+   **   ~~~   ** ...zone temperature             = 17.728 C
+   **   ~~~   ** ...supply air temperature       = 12.800 C
+   **   ~~~   ** ...temperature difference       = -4.92790 C
+   **   ~~~   ** ...calculated volume flow rate  = 8.44396 m3/s
+   **   ~~~   ** ...calculated mass flow rate    = 10.05871 kg/s
+   ** Warning ** UpdateZoneSizing: Cooling supply air temperature (calculated) within 5C of zone temperature
+   **   ~~~   ** ...check zone thermostat set point and design supply air temperatures
+   **   ~~~   ** ...zone name = CORE_MID
+   **   ~~~   ** ...design sensible cooling load = 56685.55 W
+   **   ~~~   ** ...thermostat set point temp    = 0.000 C
+   **   ~~~   ** ...zone temperature             = 17.728 C
+   **   ~~~   ** ...supply air temperature       = 12.800 C
+   **   ~~~   ** ...temperature difference       = -4.92790 C
+   **   ~~~   ** ...calculated volume flow rate  = 8.38203 m3/s
+   **   ~~~   ** ...calculated mass flow rate    = 9.98494 kg/s
+   ** Warning ** UpdateZoneSizing: Cooling supply air temperature (calculated) within 5C of zone temperature
+   **   ~~~   ** ...check zone thermostat set point and design supply air temperatures
+   **   ~~~   ** ...zone name = CORE_TOP
+   **   ~~~   ** ...design sensible cooling load = 61172.54 W
+   **   ~~~   ** ...thermostat set point temp    = 0.000 C
+   **   ~~~   ** ...zone temperature             = 17.728 C
+   **   ~~~   ** ...supply air temperature       = 12.800 C
+   **   ~~~   ** ...temperature difference       = -4.92795 C
+   **   ~~~   ** ...calculated volume flow rate  = 9.01477 m3/s
+   **   ~~~   ** ...calculated mass flow rate    = 10.73867 kg/s
+   ** Warning ** UpdateZoneSizing: Cooling supply air temperature (calculated) within 5C of zone temperature
+   **   ~~~   ** ...check zone thermostat set point and design supply air temperatures
+   **   ~~~   ** ...zone name = PERIMETER_BOT_ZN_1
+   **   ~~~   ** ...design sensible cooling load = 13289.10 W
+   **   ~~~   ** ...thermostat set point temp    = 0.000 C
+   **   ~~~   ** ...zone temperature             = 17.727 C
+   **   ~~~   ** ...supply air temperature       = 12.800 C
+   **   ~~~   ** ...temperature difference       = -4.92736 C
+   **   ~~~   ** ...calculated volume flow rate  = 2.01585 m3/s
+   **   ~~~   ** ...calculated mass flow rate    = 2.40134 kg/s
+   ** Warning ** UpdateZoneSizing: Cooling supply air temperature (calculated) within 5C of zone temperature
+   **   ~~~   ** ...check zone thermostat set point and design supply air temperatures
+   **   ~~~   ** ...zone name = PERIMETER_BOT_ZN_2
+   **   ~~~   ** ...design sensible cooling load = 13410.65 W
+   **   ~~~   ** ...thermostat set point temp    = 0.000 C
+   **   ~~~   ** ...zone temperature             = 17.728 C
+   **   ~~~   ** ...supply air temperature       = 12.800 C
+   **   ~~~   ** ...temperature difference       = -4.92787 C
+   **   ~~~   ** ...calculated volume flow rate  = 2.06266 m3/s
+   **   ~~~   ** ...calculated mass flow rate    = 2.45710 kg/s
+   ** Warning ** UpdateZoneSizing: Cooling supply air temperature (calculated) within 5C of zone temperature
+   **   ~~~   ** ...check zone thermostat set point and design supply air temperatures
+   **   ~~~   ** ...zone name = PERIMETER_BOT_ZN_3
+   **   ~~~   ** ...design sensible cooling load = 13490.67 W
+   **   ~~~   ** ...thermostat set point temp    = 0.000 C
+   **   ~~~   ** ...zone temperature             = 17.727 C
+   **   ~~~   ** ...supply air temperature       = 12.800 C
+   **   ~~~   ** ...temperature difference       = -4.92734 C
+   **   ~~~   ** ...calculated volume flow rate  = 2.04772 m3/s
+   **   ~~~   ** ...calculated mass flow rate    = 2.43931 kg/s
+   ** Warning ** UpdateZoneSizing: Cooling supply air temperature (calculated) within 5C of zone temperature
+   **   ~~~   ** ...check zone thermostat set point and design supply air temperatures
+   **   ~~~   ** ...zone name = PERIMETER_BOT_ZN_4
+   **   ~~~   ** ...design sensible cooling load = 12238.89 W
+   **   ~~~   ** ...thermostat set point temp    = 0.000 C
+   **   ~~~   ** ...zone temperature             = 17.728 C
+   **   ~~~   ** ...supply air temperature       = 12.800 C
+   **   ~~~   ** ...temperature difference       = -4.92755 C
+   **   ~~~   ** ...calculated volume flow rate  = 2.04288 m3/s
+   **   ~~~   ** ...calculated mass flow rate    = 2.43354 kg/s
+   ** Warning ** UpdateZoneSizing: Cooling supply air temperature (calculated) within 5C of zone temperature
+   **   ~~~   ** ...check zone thermostat set point and design supply air temperatures
+   **   ~~~   ** ...zone name = PERIMETER_MID_ZN_1
+   **   ~~~   ** ...design sensible cooling load = 13266.72 W
+   **   ~~~   ** ...thermostat set point temp    = 0.000 C
+   **   ~~~   ** ...zone temperature             = 17.727 C
+   **   ~~~   ** ...supply air temperature       = 12.800 C
+   **   ~~~   ** ...temperature difference       = -4.92735 C
+   **   ~~~   ** ...calculated volume flow rate  = 2.01356 m3/s
+   **   ~~~   ** ...calculated mass flow rate    = 2.39861 kg/s
+   ** Warning ** UpdateZoneSizing: Cooling supply air temperature (calculated) within 5C of zone temperature
+   **   ~~~   ** ...check zone thermostat set point and design supply air temperatures
+   **   ~~~   ** ...zone name = PERIMETER_MID_ZN_2
+   **   ~~~   ** ...design sensible cooling load = 13350.23 W
+   **   ~~~   ** ...thermostat set point temp    = 0.000 C
+   **   ~~~   ** ...zone temperature             = 17.728 C
+   **   ~~~   ** ...supply air temperature       = 12.800 C
+   **   ~~~   ** ...temperature difference       = -4.92785 C
+   **   ~~~   ** ...calculated volume flow rate  = 2.05298 m3/s
+   **   ~~~   ** ...calculated mass flow rate    = 2.44557 kg/s
+   ** Warning ** UpdateZoneSizing: Cooling supply air temperature (calculated) within 5C of zone temperature
+   **   ~~~   ** ...check zone thermostat set point and design supply air temperatures
+   **   ~~~   ** ...zone name = PERIMETER_MID_ZN_3
+   **   ~~~   ** ...design sensible cooling load = 13445.04 W
+   **   ~~~   ** ...thermostat set point temp    = 0.000 C
+   **   ~~~   ** ...zone temperature             = 17.727 C
+   **   ~~~   ** ...supply air temperature       = 12.800 C
+   **   ~~~   ** ...temperature difference       = -4.92734 C
+   **   ~~~   ** ...calculated volume flow rate  = 2.04183 m3/s
+   **   ~~~   ** ...calculated mass flow rate    = 2.43229 kg/s
+   ** Warning ** UpdateZoneSizing: Cooling supply air temperature (calculated) within 5C of zone temperature
+   **   ~~~   ** ...check zone thermostat set point and design supply air temperatures
+   **   ~~~   ** ...zone name = PERIMETER_MID_ZN_4
+   **   ~~~   ** ...design sensible cooling load = 12062.13 W
+   **   ~~~   ** ...thermostat set point temp    = 0.000 C
+   **   ~~~   ** ...zone temperature             = 17.728 C
+   **   ~~~   ** ...supply air temperature       = 12.800 C
+   **   ~~~   ** ...temperature difference       = -4.92755 C
+   **   ~~~   ** ...calculated volume flow rate  = 2.01338 m3/s
+   **   ~~~   ** ...calculated mass flow rate    = 2.39839 kg/s
+   ** Warning ** UpdateZoneSizing: Cooling supply air temperature (calculated) within 5C of zone temperature
+   **   ~~~   ** ...check zone thermostat set point and design supply air temperatures
+   **   ~~~   ** ...zone name = PERIMETER_TOP_ZN_1
+   **   ~~~   ** ...design sensible cooling load = 14169.80 W
+   **   ~~~   ** ...thermostat set point temp    = 0.000 C
+   **   ~~~   ** ...zone temperature             = 17.727 C
+   **   ~~~   ** ...supply air temperature       = 12.800 C
+   **   ~~~   ** ...temperature difference       = -4.92739 C
+   **   ~~~   ** ...calculated volume flow rate  = 2.14570 m3/s
+   **   ~~~   ** ...calculated mass flow rate    = 2.55602 kg/s
+   ** Warning ** UpdateZoneSizing: Cooling supply air temperature (calculated) within 5C of zone temperature
+   **   ~~~   ** ...check zone thermostat set point and design supply air temperatures
+   **   ~~~   ** ...zone name = PERIMETER_TOP_ZN_2
+   **   ~~~   ** ...design sensible cooling load = 13743.86 W
+   **   ~~~   ** ...thermostat set point temp    = 0.000 C
+   **   ~~~   ** ...zone temperature             = 17.728 C
+   **   ~~~   ** ...supply air temperature       = 12.800 C
+   **   ~~~   ** ...temperature difference       = -4.92782 C
+   **   ~~~   ** ...calculated volume flow rate  = 2.11886 m3/s
+   **   ~~~   ** ...calculated mass flow rate    = 2.52405 kg/s
+   ** Warning ** UpdateZoneSizing: Cooling supply air temperature (calculated) within 5C of zone temperature
+   **   ~~~   ** ...check zone thermostat set point and design supply air temperatures
+   **   ~~~   ** ...zone name = PERIMETER_TOP_ZN_3
+   **   ~~~   ** ...design sensible cooling load = 14352.59 W
+   **   ~~~   ** ...thermostat set point temp    = 0.000 C
+   **   ~~~   ** ...zone temperature             = 17.727 C
+   **   ~~~   ** ...supply air temperature       = 12.800 C
+   **   ~~~   ** ...temperature difference       = -4.92738 C
+   **   ~~~   ** ...calculated volume flow rate  = 2.17465 m3/s
+   **   ~~~   ** ...calculated mass flow rate    = 2.59051 kg/s
+   ** Warning ** UpdateZoneSizing: Cooling supply air temperature (calculated) within 5C of zone temperature
+   **   ~~~   ** ...check zone thermostat set point and design supply air temperatures
+   **   ~~~   ** ...zone name = PERIMETER_TOP_ZN_4
+   **   ~~~   ** ...design sensible cooling load = 12872.70 W
+   **   ~~~   ** ...thermostat set point temp    = 0.000 C
+   **   ~~~   ** ...zone temperature             = 17.728 C
+   **   ~~~   ** ...supply air temperature       = 12.800 C
+   **   ~~~   ** ...temperature difference       = -4.92756 C
+   **   ~~~   ** ...calculated volume flow rate  = 2.14867 m3/s
+   **   ~~~   ** ...calculated mass flow rate    = 2.55956 kg/s
+   ************* Beginning System Sizing Calculations
+   ************* Beginning Plant Sizing Calculations
+   ************* Testing Individual Branch Integrity
+   ************* All Branches passed integrity testing
+   ************* Testing Individual Supply Air Path Integrity
+   ************* All Supply Air Paths passed integrity testing
+   ************* Testing Individual Return Air Path Integrity
+   ************* All Return Air Paths passed integrity testing
+   ************* No node connection errors were found.
+   ************* Beginning Simulation
+   ** Severe  ** DualSetPointWithDeadBand: Effective heating set-point higher than effective cooling set-point - increase deadband if using unmixed air model
+   **   ~~~   ** occurs in Zone=CORE_BOTTOM Environment=PHILADELPHIA 2014, at Simulation time=01/02 06:00 - 06:10
+   **   ~~~   ** LoadToHeatingSetPoint=51985.890, LoadToCoolingSetPoint=2134.706
+   **   ~~~   ** Zone TempDepZnLd=4124.68
+   **   ~~~   ** Zone TempIndZnLd=74171.78
+   **   ~~~   ** Zone Heating ThermostatSetPoint=24.21
+   **   ~~~   ** Zone Cooling ThermostatSetPoint=17.73
+   **  Fatal  ** Program terminates due to above conditions.
+   ...Summary of Errors that led to program termination:
+   ..... Reference severe error count=1
+   ..... Last severe error=DualSetPointWithDeadBand: Effective heating set-point higher than effective cooling set-point - increase deadband if using unmixed air model
+   ************* EnergyPlus Warmup Error Summary. During Warmup: 0 Warning; 0 Severe Errors.
+   ************* EnergyPlus Sizing Error Summary. During Sizing: 16 Warning; 0 Severe Errors.
+   ************* EnergyPlus Terminated--Fatal Error Detected. 16 Warning; 1 Severe Errors; Elapsed Time=00hr 00min  3.20sec

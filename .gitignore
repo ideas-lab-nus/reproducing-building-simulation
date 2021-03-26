@@ -2,3 +2,25 @@
 .Rhistory
 .RData
 .Ruserdata
+
+# EnergyPlus output
+fort.6
+*.audit
+*.bnd
+*.dbg
+*.dxf
+*.eio
+*.end
+*.eso
+*.mdd
+*.mtd
+*.mtr
+*.mvi
+*.rdd
+*.rvaudit
+*.rvi
+*.shd
+*.sql
+*Sqlite.err
+# EnergyPlus csv output in side 'sim'
+data/sim/**/*.csv

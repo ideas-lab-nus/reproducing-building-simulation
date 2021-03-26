@@ -1,0 +1,146 @@
+---
+title: "An example workflow for creating synthetic meter data"
+author:
+  - Hongyuan Jia
+  - Adrian Chong
+date: "`r Sys.Date()`"
+output:
+    bookdown::html_document2:
+        toc: yes
+        toc_float:
+            collapsed: false
+            smooth_scroll: false
+        fig_caption: yes
+        theme:
+            version: 4
+            bootswath: flatly
+---
+
+```{r setup, include = FALSE}
+# by default, only show code
+knitr::opts_chunk$set(echo = TRUE, results = "hide")
+
+library(tidyverse, warn.conflicts = FALSE) # data analysis
+library(eplusr)                            # integration with EnergyPlus
+library(here)                              # project-root-based file path
+
+# disable verbose information
+eplusr_option(verbose_info = FALSE)
+
+# install EnergyPlus v9.1 used in this workflow if necessary
+if (!is_avail_eplus(9.1)) install_eplus(9.1, local = TRUE)
+
+# load utility functions
+source(here("R/utils.R"))
+# load functions to read or extract data from simulations
+source(here("R/data.R"))
+```
+
+# Building energy model description
+
+In this calibration, we use the U.S. Department of Energy (DOE) medium office
+reference building model in compliance with Standard ASHRAE 90.1 – 2004.
+
+```{r read, results = "hide"}
+# path of the model
+path <- here("data-raw/idf/RefBldgMediumOfficeNew2004_Chicago.idf")
+
+# read model
+model <- read_idf(path)
+```
+
+```{r snap-3d, eval = !file.exists(here("figures/3d.png"))}
+# open a viewer to show 3D building geometry
+viewer <- model$view(x_ray = TRUE)
+
+# save a snapshot of current view
+snap <- viewer$snapshot(here("figures/3d.png"))
+
+# close the viewer
+viewer$close()
+```
+
+Fig. \@ref(fig:3d-view) shows a 3D view of the building geometry. It is a
+3-story, 15-zone medium office building with a total floor area of 4982 m^2. A
+central packaged air conditioning unit with a gas furnace is equipped on each
+story. The air distribution systems are Variable Air Volume (VAV) terminal boxes
+with electric reheating coils.
+
+```{r 3d-view, results = "asis", fig.cap = "3D view of the medium office reference building model"}
+knitr::include_graphics(here("figures/3d.png"))
+```
+
+# Location
+
+The model was built for Chicago, U.S. Since we did not have measured weather
+data for Chicago, we deciaded to use our Philadelphia 2014 AMY (Actual
+Meteorological Year) weather file for the synthetic meter data.
+
+# Synthetic data creation
+
+## Observed outputs for calibration
+
+For observed output, we choose hourly building electricity consumption. The
+corresponding output variable in EnergyPlus is `Electriity: Building` with
+`Hourly` reporting frequency.
+
+Below we made some necessary to the model, including adding the output meter and
+setting the begin year of `RunPeriod` objects based on our AMY weather data. We
+saved the modifed model as `Synthetic.idf` in the `data/idf` folder.
+
+```{r add-outputs}
+# remove all existing outputs
+model$`Output:Variable` <- NULL
+model$`Output:Meter` <- NULL
+
+# add hourly building electricity output meter
+model$add(Output_Meter = list("Electricity:Building", "Hourly"))
+
+# make sure weater file is used
+model$SimulationControl$Run_Simulation_for_Weather_File_Run_Periods <- "Yes"
+
+# update RunPeriod to correctly indicate an AMY EPW file is used
+model$RunPeriod$annual$set(
+    name = "Philadelphia 2014",
+    begin_year = 2014,
+    day_of_week_for_start_day = "Wednesday"
+)
+
+# save the model
+model$save(here("data/idf/Synthetic.idf"), overwrite = TRUE)
+```
+
+## Run simulation to create synthetic data
+
+Next, we run the model using AMY EPW file to create synthetic observed output.
+The data will present noise-free measurements which functions as a surrogate for
+clean sensor data.
+
+Below we ran an annual simulation using the AMY EPW stored in
+`data-raw/epw/AMY` folder.
+
+```{r sim-synthetic}
+# path of AMY EPW
+path_epw_amy <- here("data-raw/epw/AMY/PA_PHILADELPHIA_720304_14-13.epw")
+
+# run annual simulation for AMY
+model$run(path_epw_amy, here("data/sim/Synthetic"), echo = FALSE)
+```
+
+Once the simulation completed, we extracted the output using `$report_data()`
+method, convert the unit of electricity from Joules to kWh and save the values
+together with the timestamp to a csv file named `synthetic_meter.csv` in the
+`data` folder.
+
+```{r meter-synthetic}
+synthetic_meter <- model %>% extract_electricity()
+
+# save synthetic meter data
+write_csv(synthetic_meter, here("data/synthetic_meter.csv"))
+```
+
+# Session Info
+
+```{r session-info, results = "markup"}
+sessionInfo()
+```

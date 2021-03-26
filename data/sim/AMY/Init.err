@@ -1,0 +1,69 @@
+Program Version,EnergyPlus, Version 9.1.0-08d2e308bb, YMD=2021.03.26 14:58,
+   ************* Beginning Zone Sizing Calculations
+   ** Warning ** Weather file location will be used rather than entered (IDF) Location object.
+   **   ~~~   ** ..Location object=USA IL-CHICAGO-OHARE
+   **   ~~~   ** ..Weather File Location=PHILADELPHIA - USA Custom-720304 WMO#=720304
+   **   ~~~   ** ..due to location differences, Latitude difference=[1.63] degrees, Longitude difference=[12.49] degrees.
+   **   ~~~   ** ..Time Zone difference=[1.0] hour(s), Elevation difference=[51.58] percent, [98.00] meters.
+   ************* Beginning System Sizing Calculations
+   ************* Beginning Plant Sizing Calculations
+   ************* Testing Individual Branch Integrity
+   ************* All Branches passed integrity testing
+   ************* Testing Individual Supply Air Path Integrity
+   ************* All Supply Air Paths passed integrity testing
+   ************* Testing Individual Return Air Path Integrity
+   ************* All Return Air Paths passed integrity testing
+   ************* No node connection errors were found.
+   ************* Beginning Simulation
+   ** Severe  ** CheckWarmupConvergence: Loads Initialization, Zone="PERIMETER_BOT_ZN_1" did not converge after 25 warmup days.
+   **   ~~~   ** See Warmup Convergence Information in .eio file for details.
+   **   ~~~   ** ...Environment(RunPeriod)="PHILADELPHIA 2014"
+   **   ~~~   ** ..Max Temp Comparison = 3.93E-003 vs Temperature Convergence Tolerance=0.20 - Pass Convergence
+   **   ~~~   ** ..Min Temp Comparison = 2.92E-002 vs Temperature Convergence Tolerance=0.20 - Pass Convergence
+   **   ~~~   ** ..Max Heat Load Comparison = 1.7700E-002 vs Loads Convergence Tolerance=4.00E-002 - Pass Convergence
+   **   ~~~   ** ..Max Cool Load Comparison = 5.6996E-002 vs Loads Convergence Tolerance=4.00E-002 - Fail Convergence
+   ** Severe  ** CheckWarmupConvergence: Loads Initialization, Zone="PERIMETER_BOT_ZN_2" did not converge after 25 warmup days.
+   **   ~~~   ** ...Environment(RunPeriod)="PHILADELPHIA 2014"
+   **   ~~~   ** ..Max Temp Comparison = 2.61E-002 vs Temperature Convergence Tolerance=0.20 - Pass Convergence
+   **   ~~~   ** ..Min Temp Comparison = 5.04E-002 vs Temperature Convergence Tolerance=0.20 - Pass Convergence
+   **   ~~~   ** ..Max Heat Load Comparison = 4.8038E-003 vs Loads Convergence Tolerance=4.00E-002 - Pass Convergence
+   **   ~~~   ** ..Max Cool Load Comparison = 0.8215 vs Loads Convergence Tolerance=4.00E-002 - Fail Convergence
+   ** Severe  ** CheckWarmupConvergence: Loads Initialization, Zone="PERIMETER_BOT_ZN_3" did not converge after 25 warmup days.
+   **   ~~~   ** ...Environment(RunPeriod)="PHILADELPHIA 2014"
+   **   ~~~   ** ..Max Temp Comparison = 1.12E-004 vs Temperature Convergence Tolerance=0.20 - Pass Convergence
+   **   ~~~   ** ..Min Temp Comparison = 3.36E-003 vs Temperature Convergence Tolerance=0.20 - Pass Convergence
+   **   ~~~   ** ..Max Heat Load Comparison = 0.1057 vs Loads Convergence Tolerance=4.00E-002 - Fail Convergence
+   **   ~~~   ** ..Max Cool Load Comparison = 3.5428E-004 vs Loads Convergence Tolerance=4.00E-002 - Pass Convergence
+   ** Severe  ** CheckWarmupConvergence: Loads Initialization, Zone="PERIMETER_BOT_ZN_4" did not converge after 25 warmup days.
+   **   ~~~   ** ...Environment(RunPeriod)="PHILADELPHIA 2014"
+   **   ~~~   ** ..Max Temp Comparison = 2.75E-004 vs Temperature Convergence Tolerance=0.20 - Pass Convergence
+   **   ~~~   ** ..Min Temp Comparison = 4.55E-002 vs Temperature Convergence Tolerance=0.20 - Pass Convergence
+   **   ~~~   ** ..Max Heat Load Comparison = 9.5630E-002 vs Loads Convergence Tolerance=4.00E-002 - Fail Convergence
+   **   ~~~   ** ..Max Cool Load Comparison = 1.0954E-004 vs Loads Convergence Tolerance=4.00E-002 - Pass Convergence
+   ** Warning ** SimHVAC: Maximum iterations (25) exceeded for all HVAC loops, at PHILADELPHIA 2014, 02/15 11:50 - 12:00
+   **   ~~~   ** The solution for one or more of the Air Loop HVAC systems did not appear to converge
+   **   ~~~   ** ...use Output:Diagnostics,DisplayExtraWarnings; to show more details on each max iteration exceeded.
+   ** Warning ** SimHVAC: Maximum iterations (25) exceeded for all HVAC loops, at PHILADELPHIA 2014, 09/07 06:30 - 06:40
+   **   ~~~   ** The solution for one or more of the Air Loop HVAC systems did not appear to converge
+   ** Warning ** SimHVAC: Maximum iterations (25) exceeded for all HVAC loops, at PHILADELPHIA 2014, 09/07 06:30 - 06:35
+   **   ~~~   ** The solution for one or more of the Air Loop HVAC systems did not appear to converge
+   ** Warning ** SimHVAC: Maximum iterations (25) exceeded for all HVAC loops, at PHILADELPHIA 2014, 09/07 06:35 - 06:40
+   **   ~~~   ** The solution for one or more of the Air Loop HVAC systems did not appear to converge
+   ************* Simulation Error Summary *************
+   *************
+   ************* ===== Final Error Summary =====
+   ************* The following error categories occurred.  Consider correcting or noting.
+   ************* Loads Initialization did not Converge
+   ************* ..1) very high thermal mass such as very thick concrete (solution: increase max number of warmup
+   ************* ..   days in the BUILDING object);
+   ************* ..2) moderate mass and inadequate space conditioning such that the building keeps getting warmer
+   ************* ..   and warmer on successive days (solution: add HVAC, check building thermal properties,
+   ************* ..   check if infiltration is included, make sure HVAC properly controlled);
+   ************* ..3) a soil layer modeled below the concrete slab - (solution remove this layer and read about
+   ************* ..   ground temperatures in the Auxiliary Programs document).
+   ************* ..4) unreasonable (too small) limits in the BUILDING object for temperature (.4 default) or
+   ************* ..   loads tolerances (.04 default)
+   *************
+   ************* EnergyPlus Warmup Error Summary. During Warmup: 0 Warning; 4 Severe Errors.
+   ************* EnergyPlus Sizing Error Summary. During Sizing: 1 Warning; 0 Severe Errors.
+   ************* EnergyPlus Completed Successfully-- 5 Warning; 4 Severe Errors; Elapsed Time=00hr 00min 29.96sec
