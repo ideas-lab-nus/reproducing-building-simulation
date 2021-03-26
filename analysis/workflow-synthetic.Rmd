@@ -122,7 +122,7 @@ clean sensor data.
 Below we ran an annual simulation using the AMY EPW stored in
 `data-raw/epw/AMY` folder.
 
-```{r run-base}
+```{r sim-synthetic}
 # path of AMY EPW
 path_epw_amy <- here("data-raw/epw/AMY/PA_PHILADELPHIA_720304_14-13.epw")
 
@@ -135,7 +135,7 @@ method, convert the unit of electricity from Joules to kWh and save the values
 together with the timestamp to a csv file named `synthetic_meter.csv` in the
 `data` folder.
 
-```{r synthetic-meter}
+```{r meter-synthetic}
 synthetic_meter <- model %>% extract_electricity()
 
 # save synthetic meter data
