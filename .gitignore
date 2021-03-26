@@ -7,17 +7,20 @@
 fort.6
 *.audit
 *.bnd
+*.dbg
 *.dxf
 *.eio
 *.end
-*Sqlite.err
 *.eso
 *.mdd
 *.mtd
 *.mtr
+*.mvi
 *.rdd
 *.rvaudit
+*.rvi
 *.shd
 *.sql
+*Sqlite.err
 # EnergyPlus csv output in side 'sim'
 data/sim/**/*.csv
