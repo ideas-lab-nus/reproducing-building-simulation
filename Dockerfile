@@ -9,6 +9,8 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends \
     tk8.6-dev
 
+COPY . .
+
 ENV RENV_VERSION 0.13.0
 RUN R -e "install.packages('remotes', repos = c(CRAN = 'https://cloud.r-project.org'))"
 RUN R -e "remotes::install_github('rstudio/renv@${RENV_VERSION}')"
