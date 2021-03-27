@@ -9,7 +9,9 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends \
     tk8.6-dev
 
-COPY . .
+WORKDIR /home/rstudio
+RUN git clone https://github.com/ideas-lab-nus/reproducing-building-simulation.git
+WORKDIR reproducing-building-simulation
 
 ENV RENV_VERSION 0.13.0
 RUN R -e "install.packages('remotes', repos = c(CRAN = 'https://cloud.r-project.org'))"
