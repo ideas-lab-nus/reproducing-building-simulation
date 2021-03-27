@@ -1,8 +1,9 @@
 # A simple example of reproducible building energy simulation
 
 [![Launch RStudio Cloud](https://img.shields.io/badge/RStudio-Cloud-blue)](https://rstudio.cloud/project/2306579)
+[![Docker Build Status](https://img.shields.io/docker/cloud/automated/hongyuanjia/reproducing-building-simulation.svg)](https://hub.docker.com/r/hongyuanjia/reproducing-building-simulation)
 
-This repository contains a simple example demonstrating the use of Docker containers to reproduce the calibration 
+This repository contains a simple example demonstrating the use of Docker containers to reproduce the calibration
 of a building energy simulation model.
 
 More details can be found in Section 6.3 of [our paper](https://github.com/ideas-lab-nus/calibrating-building-simulation-review):
@@ -25,11 +26,13 @@ Please cite this repository as:
 
 ## How to access
 
-You can try out this example project as long as you have a browser and an
-internet connection. [Click here](https://rstudio.cloud/project/2306579) to
-navigate your browser to an RStudio Cloud instance. Alternatively, you can clone
-or download this code repository and install the required R packages by calling
-`renv::restore()`.
+There are several ways to try out this example:
+
+1. Using the [Docker image](https://hub.docker.com/r/hongyuanjia/reproducing-building-simulation).
+
+2. Using the [RStudio Cloud](https://rstudio.cloud/project/2306579) instance.
+
+3. Clone or download this repository and install the required R packages by calling `renv::restore()`.
 
 ## File structure
 
