@@ -15,6 +15,13 @@ output:
 ---
 
 ```{r setup, include = FALSE}
+# use English locale
+if (.Platform$OS.type == "windows") {
+    Sys.setlocale(locale = "English")
+} else {
+    Sys.setlocale(locale = "en_us.utf-8")
+}
+
 # by default, only show code
 knitr::opts_chunk$set(echo = TRUE, results = "hide")
 
@@ -79,7 +86,7 @@ Meteorological Year) weather file for the synthetic meter data.
 ## Observed outputs for calibration
 
 For observed output, we choose hourly building electricity consumption. The
-corresponding output variable in EnergyPlus is `Electriity: Building` with
+corresponding output variable in EnergyPlus is `Electricity:Facility` with
 `Hourly` reporting frequency.
 
 Below we made some necessary to the model, including adding the output meter and
@@ -92,7 +99,7 @@ model$`Output:Variable` <- NULL
 model$`Output:Meter` <- NULL
 
 # add hourly building electricity output meter
-model$add(Output_Meter = list("Electricity:Building", "Hourly"))
+model$add(Output_Meter = list("Electricity:Facility", "Hourly"))
 
 # make sure weater file is used
 model$SimulationControl$Run_Simulation_for_Weather_File_Run_Periods <- "Yes"

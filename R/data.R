@@ -19,9 +19,9 @@ extract_electricity <- function(idf) {
 
     # extract the annual electricity
     job$report_data(
-        name = "Electricity:Building",
+        name = "Electricity:Facility",
         environment_name = c("annual", "Philadelphia 2014"),
-        year = 2014) %>%
+        interval = 60, year = 2014) %>%
         # convert to kWh
         dplyr::mutate(value = j_to_kwh(value)) %>%
         dplyr::select(case, datetime, `electricity [kWh]` = value)
@@ -38,7 +38,7 @@ weekly_compare <- function(meter, month = 7, week = 1) {
         ggplot2::ggplot(ggplot2::aes(datetime, `electricity [kWh]`, color = case)) +
         ggplot2::geom_line() +
         ggplot2::scale_x_datetime(NULL, date_labels = "%b %d %a", date_breaks = "1 day") +
-        ggplot2::scale_y_continuous("Electricity / kWh", limits = c(0, 210)) +
+        ggplot2::scale_y_continuous("Electricity / kWh", limits = c(0, 300)) +
         ggplot2::theme_bw()
 }
 

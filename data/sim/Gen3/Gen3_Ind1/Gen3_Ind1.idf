@@ -164,7 +164,7 @@ Site:Location,
 
 !-   ===========  ALL OBJECTS IN CLASS: SIZINGPERIOD:DESIGNDAY ===========
 
-! CHICAGO_IL_USA Annual Heating 99.6%, MaxDB=-20.6Ã‚Â°C
+! CHICAGO_IL_USA Annual Heating 99.6%, MaxDB=-20.6鎺矯
 SizingPeriod:DesignDay,
     CHICAGO Ann Htg 99.6% Condns DB,  !- Name
     1,                       !- Month
@@ -193,7 +193,7 @@ SizingPeriod:DesignDay,
     ,                        !- ASHRAE Clear Sky Optical Depth for Diffuse Irradiance (taud) {dimensionless}
     0;                       !- Sky Clearness
 
-! CHICAGO_IL_USA Annual Cooling (WB=>MDB) .4%, MDB=31.2Ã‚Â°C WB=25.5Ã‚Â°C
+! CHICAGO_IL_USA Annual Cooling (WB=>MDB) .4%, MDB=31.2鎺矯 WB=25.5鎺矯
 SizingPeriod:DesignDay,
     CHICAGO Ann Clg .4% Condns WB=>MDB,  !- Name
     7,                       !- Month
@@ -927,9 +927,9 @@ Material,
     Steel Frame NonRes Wall Insulation,  !- Name
     MediumRough,             !- Roughness
     0.0870564552646045,      !- Thickness {m}
-    0.03348,                 !- Conductivity {W/m-K}
-    204.81,                  !- Density {kg/m3}
-    904.41,                  !- Specific Heat {J/kg-K}
+    0.05425,                 !- Conductivity {W/m-K}
+    205.67,                  !- Density {kg/m3}
+    1254.3,                  !- Specific Heat {J/kg-K}
     0.9,                     !- Thermal Absorptance
     0.7,                     !- Solar Absorptance
     0.7;                     !- Visible Absorptance
@@ -1101,7 +1101,7 @@ Material:NoMass,
 
 WindowMaterial:SimpleGlazingSystem,
     NonRes Fixed Assembly Window,  !- Name
-    4.7158,                  !- U-Factor {W/m2-K}
+    1.6464,                  !- U-Factor {W/m2-K}
     0.226;                   !- Solar Heat Gain Coefficient
 
 
@@ -9320,7 +9320,7 @@ OutputControl:ReportingTolerances,
 !-   ===========  ALL OBJECTS IN CLASS: OUTPUT:METER ===========
 
 Output:Meter,
-    Electricity:Building,    !- Key Name
+    Electricity:Facility,    !- Key Name
     Hourly;                  !- Reporting Frequency
 
 

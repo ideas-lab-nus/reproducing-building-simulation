@@ -9321,7 +9321,7 @@ OutputControl:ReportingTolerances,
 !-   ===========  ALL OBJECTS IN CLASS: OUTPUT:METER ===========
 
 Output:Meter,
-    Electricity:Building,    !- Key Name
+    Electricity:Facility,    !- Key Name
     Hourly;                  !- Reporting Frequency
 
 

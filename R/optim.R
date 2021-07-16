@@ -36,7 +36,7 @@ calib_fitness <- function(
 
     # run simulation
     path_epw_amy <- here::here("data-raw/epw/AMY/PA_PHILADELPHIA_720304_14-13.epw")
-    ## contruct individual simulation output path
+    ## construct individual simulation output path
     dir_out <- here::here("data/sim", dir_gen, sprintf("%s_Ind%i", dir_gen, ind))
     ## run simulation with AMY
     idf$run(path_epw_amy, dir_out, echo = FALSE)
@@ -66,13 +66,14 @@ calib_fitness <- function(
                 "Heating Setpoint: "         , round(heating       , 1) , " C\n"
             )
         )
-    ## contruct individual plot path
+    ## construct individual plot path
     png_ind <- sprintf("%s_Ind%i.png", dir_gen, ind)
     ## create the folder to store plot of each generation
     if (!dir.exists(here::here("figures", dir_gen))) {
         dir.create(here::here("figures", dir_gen))
     }
     ## save the plot
+    use_english_locale()
     ggplot2::ggsave(here::here("figures", dir_gen, png_ind),
         p, height = 6, width = 10, dpi = 300)
 

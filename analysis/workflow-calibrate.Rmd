@@ -40,6 +40,9 @@ source(here("R/measures.R"))
 source(here("R/data.R"))
 # load fitness functions for optimization
 source(here("R/optim.R"))
+
+# use English locale
+use_english_locale()
 ```
 
 # Building energy model description
@@ -84,7 +87,7 @@ the baseline model are listed in the table blow:
 | 11 | Heating setpoint                 | `Schedule:Compact`                   | `HTGSETP_SCH`                        | `Field 6`, `Field 16` and `Field 21`       | 21       |
 
 For observed output, we choose hourly building electricity consumption. The
-corresponding output variable in EnergyPlus is `Electriity: Building` with
+corresponding output variable in EnergyPlus is `Electricity:Facility` with
 `Hourly` reporting frequency.
 
 # Create the initial test model to be calibrated
@@ -198,7 +201,7 @@ init$`Output:Variable` <- NULL
 init$`Output:Meter` <- NULL
 
 # add hourly building electricity output meter
-init$add(Output_Meter = list("Electricity:Building", "Hourly"))
+init$add(Output_Meter = list("Electricity:Facility", "Hourly"))
 
 # make sure weater file is used
 init$SimulationControl$Run_Simulation_for_Weather_File_Run_Periods <- "Yes"

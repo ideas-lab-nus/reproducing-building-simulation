@@ -1,4 +1,4 @@
-Program Version,EnergyPlus, Version 9.1.0-08d2e308bb, YMD=2021.03.27 03:30,
+Program Version,EnergyPlus, Version 9.1.0-08d2e308bb, YMD=2021.07.16 12:28,
    ************* Beginning Zone Sizing Calculations
    ** Warning ** Weather file location will be used rather than entered (IDF) Location object.
    **   ~~~   ** ..Location object=USA IL-CHICAGO-OHARE
@@ -17,10 +17,7 @@ Program Version,EnergyPlus, Version 9.1.0-08d2e308bb, YMD=2021.03.27 03:30,
    ************* All Return Air Paths passed integrity testing
    ************* No node connection errors were found.
    ************* Beginning Simulation
-   ** Warning ** SimHVAC: Maximum iterations (25) exceeded for all HVAC loops, at PHILADELPHIA 2014, 03/20 07:40 - 07:50
-   **   ~~~   ** The solution for one or more of the Air Loop HVAC systems did not appear to converge
-   **   ~~~   ** ...use Output:Diagnostics,DisplayExtraWarnings; to show more details on each max iteration exceeded.
    ************* Simulation Error Summary *************
    ************* EnergyPlus Warmup Error Summary. During Warmup: 0 Warning; 0 Severe Errors.
    ************* EnergyPlus Sizing Error Summary. During Sizing: 2 Warning; 0 Severe Errors.
-   ************* EnergyPlus Completed Successfully-- 3 Warning; 0 Severe Errors; Elapsed Time=00hr 00min 41.32sec
+   ************* EnergyPlus Completed Successfully-- 2 Warning; 0 Severe Errors; Elapsed Time=00hr 00min 38.94sec

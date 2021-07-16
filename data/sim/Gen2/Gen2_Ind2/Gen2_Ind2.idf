@@ -164,7 +164,7 @@ Site:Location,
 
 !-   ===========  ALL OBJECTS IN CLASS: SIZINGPERIOD:DESIGNDAY ===========
 
-! CHICAGO_IL_USA Annual Heating 99.6%, MaxDB=-20.6Ã‚Â°C
+! CHICAGO_IL_USA Annual Heating 99.6%, MaxDB=-20.6鎺矯
 SizingPeriod:DesignDay,
     CHICAGO Ann Htg 99.6% Condns DB,  !- Name
     1,                       !- Month
@@ -193,7 +193,7 @@ SizingPeriod:DesignDay,
     ,                        !- ASHRAE Clear Sky Optical Depth for Diffuse Irradiance (taud) {dimensionless}
     0;                       !- Sky Clearness
 
-! CHICAGO_IL_USA Annual Cooling (WB=>MDB) .4%, MDB=31.2Ã‚Â°C WB=25.5Ã‚Â°C
+! CHICAGO_IL_USA Annual Cooling (WB=>MDB) .4%, MDB=31.2鎺矯 WB=25.5鎺矯
 SizingPeriod:DesignDay,
     CHICAGO Ann Clg .4% Condns WB=>MDB,  !- Name
     7,                       !- Month
@@ -9320,7 +9320,7 @@ OutputControl:ReportingTolerances,
 !-   ===========  ALL OBJECTS IN CLASS: OUTPUT:METER ===========
 
 Output:Meter,
-    Electricity:Building,    !- Key Name
+    Electricity:Facility,    !- Key Name
     Hourly;                  !- Reporting Frequency
 
 
