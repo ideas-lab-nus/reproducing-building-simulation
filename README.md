@@ -6,7 +6,7 @@
 This repository contains a simple example demonstrating the use of Docker containers to reproduce the calibration
 of a building energy simulation model.
 
-More details can be found in Section 6.3 of [our paper](https://github.com/ideas-lab-nus/calibrating-building-simulation-review):
+More details can be found in Section 7.4 of [our paper](https://github.com/ideas-lab-nus/calibrating-building-simulation-review):
 
 > Adrian Chong, Yaonan Gu and Hongyuan Jia, (2021).
 > *Calibrating building energy simulation models: A review of the basics to guide future work*.
