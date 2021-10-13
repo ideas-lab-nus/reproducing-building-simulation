@@ -9,20 +9,25 @@ of a building energy simulation model.
 More details can be found in Section 6.3 of [our paper](https://github.com/ideas-lab-nus/calibrating-building-simulation-review):
 
 > Adrian Chong, Yaonan Gu and Hongyuan Jia, (2021).
-> *Calibrating building energy simulation models: A review of methods, inputs and outputs*.
-> *In Review*. <https://doi.org/xxx/xxx>
+> *Calibrating building energy simulation models: A review of the basics to guide future work*.
+> Energy and Buildings, 111533. doi: <https://doi.org/10.1016/j.enbuild.2021.111533>
+
 
 ## Citation
 
-Please cite this repository as:
+Please cite this compendium as:
 ```
 @article{chong2021calibrating,
-  title={Calibrating building energy simulation models: A review of methods, inputs and outputs},
+  title={Calibrating building energy simulation models: A review of the basics to guide future work},
   author={Chong, Adrian and Gu, Yaonan and Jia, Hongyuan},
+  journal={Energy and Buildings},
+  pages={111533},
   year={2021},
-  note={In Review}
+  doi={https://doi.org/10.1016/j.enbuild.2021.111533},
+  publisher={Elsevier}
 }
 ```
+
 
 ## How to access
 
